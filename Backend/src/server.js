@@ -1,9 +1,12 @@
-import express from 'express';
+import http, { createServer } from "http";
+import app from "./app.js";
 
-const app = express();
+const PORT = process.env.PORT || 8080
 
 
-app.listen(8000 , ()=>{
-    console.log("server is Runnniong");
-    
+const server = createServer(app);
+
+
+server.listen(PORT , ()=>{
+    console.log(`server is Running On Port ${PORT}`);
 })

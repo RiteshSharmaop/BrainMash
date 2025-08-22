@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
-const LLMColumn = ({ name, color, messages, isTyping, onClose, isVisible }) => {
+const LLMColumn = ({ name, model ,color, messages, isTyping, onClose, isVisible }) => {
   const icons = {
     ChatGPT: "🤖",
     Gemini: "💎",
     DeepSeek: "🔍",
     Perplexity: "🧠",
-    CloudSonar: "☁️",
+    Lama: "☁️",
   };
 
   const messagesEndRef = useRef(null);

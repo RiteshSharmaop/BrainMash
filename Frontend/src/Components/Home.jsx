@@ -31,11 +31,11 @@ const Home = () => {
   });
 
   const llmConfigs = [
-    { name: 'ChatGPT', color: 'bg-green-600' },
-    { name: 'Gemini', color: 'bg-blue-600' },
-    { name: 'DeepSeek', color: 'bg-purple-600' },
-    { name: 'Perplexity', color: 'bg-orange-600' },
-    { name: 'CloudSonar', color: 'bg-cyan-600' }
+    { name: 'ChatGPT', color: 'bg-green-600' , model:"openai/gpt-4o-mini"},
+    { name: 'Gemini', color: 'bg-blue-600',  model:"google/gemini-2.5-flash"  },
+    { name: 'DeepSeek', color: 'bg-purple-600' , model:"deepseek/deepseek-chat-v3.1" },
+    { name: 'Perplexity', color: 'bg-orange-600',  model:"perplexity/sonar-pro"},
+    { name: 'Lama', color: 'bg-cyan-600' ,  model:"meta-llama/llama-4-maverick" }
   ];
 
   const [input, setInput] = useState("");
@@ -169,6 +169,7 @@ const Home = () => {
             <LLMColumn
               key={llm.name}
               name={llm.name}
+              model={llm.model}
               color={llm.color}
               messages={messages[llm.name]}
               isTyping={isTyping[llm.name]}
