@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MessageCircle } from "lucide-react";
-
+import axios from "axios"
 import ParticleBackground from "./Layout/ParticleBackground";
 import LLMColumn from "./Chat/LLMColumn";
 import Sidebar from "./Layout/Sidebar";
@@ -11,7 +11,7 @@ const Home = () => {
     Gemini: true,
     DeepSeek: true,
     Perplexity: true,
-    CloudSonar: true
+    Lama: true
   });
 
   const [messages, setMessages] = useState({
@@ -19,7 +19,7 @@ const Home = () => {
     Gemini: [],
     DeepSeek: [],
     Perplexity: [],
-    CloudSonar: []
+    Lama: []
   });
 
   const [isTyping, setIsTyping] = useState({
@@ -27,7 +27,7 @@ const Home = () => {
     Gemini: false,
     DeepSeek: false,
     Perplexity: false,
-    CloudSonar: false
+    Lama: false
   });
 
   const llmConfigs = [
@@ -87,46 +87,96 @@ const Home = () => {
       Gemini: `Gemini's analysis of: "${query}". Detailed insights.`,
       DeepSeek: `DeepSeek's deep analysis: "${query}". Technical details.`,
       Perplexity: `Perplexity's research on: "${query}". Relevant findings.`,
-      CloudSonar: `CloudSonar's insights: "${query}". Scalable solutions.`
+      Lama: `Lama's insights: "${query}". Scalable solutions.`
     };
     return responses[llmName] || `Response from ${llmName}`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const userMessage = { type: 'user', content: input, time: new Date().toLocaleTimeString() };
+    const userMessage = { type: "user", content: input, time: new Date().toLocaleTimeString() };
 
-    setMessages(prev => {
+    // Add user message to all visible LLMs
+    setMessages((prev) => {
       const updated = {};
-      Object.keys(prev).forEach(llm => { updated[llm] = [...prev[llm], userMessage]; });
+      Object.keys(prev).forEach((llm) => {
+        updated[llm] = [...prev[llm], userMessage];
+      });
       return updated;
     });
 
-    setIsTyping(prev => {
+    // Set typing indicator ON
+    setIsTyping((prev) => {
       const updated = {};
-      Object.keys(prev).forEach(llm => { updated[llm] = visibleLLMs[llm]; });
+      Object.keys(prev).forEach((llm) => {
+        updated[llm] = visibleLLMs[llm];
+      });
       return updated;
     });
 
-    Object.keys(messages).forEach((llmName, index) => {
-      if (!visibleLLMs[llmName]) return;
-      setTimeout(() => {
-        const aiMessage = { type: 'ai', content: generateResponse(llmName, input), time: new Date().toLocaleTimeString() };
-        setMessages(prev => ({ ...prev, [llmName]: [...prev[llmName], aiMessage] }));
-        setIsTyping(prev => ({ ...prev, [llmName]: false }));
-      }, (index + 1) * 1500 + Math.random() * 1000);
-    });
+    try {
+      // Build request payload
+      const selectedLLMs = llmConfigs
+        .filter((llm) => visibleLLMs[llm.name])
+        .map((llm) => llm.model);
 
-    setInput('');
+      const res = await axios.post("http://localhost:8000/api/chat/", {
+        prompt: input,
+        selectedLLMs,
+      });
+
+      const data = res.data;
+
+      if (data.success) {
+        const results = data.data; // { "openai/gpt-4o-mini": "...", "google/gemini-2.5-flash": "..." }
+
+        // Add AI replies per model
+        llmConfigs.forEach((llm) => {
+          if (!visibleLLMs[llm.name]) return;
+
+          const aiMessage = {
+            type: "ai",
+            content: results[llm.model] || "⚠️ No response",
+            time: new Date().toLocaleTimeString(),
+          };
+
+          setMessages((prev) => ({
+            ...prev,
+            [llm.name]: [...prev[llm.name], aiMessage],
+          }));
+
+          setIsTyping((prev) => ({ ...prev, [llm.name]: false }));
+        });
+      } else {
+        console.error("Backend error:", data.message);
+      }
+    } catch (err) {
+      console.error("Request failed:", err);
+      llmConfigs.forEach((llm) => {
+        if (!visibleLLMs[llm.name]) return;
+        const aiMessage = {
+          type: "ai",
+          content: "⚠️ Error contacting backend",
+          time: new Date().toLocaleTimeString(),
+        };
+        setMessages((prev) => ({
+          ...prev,
+          [llm.name]: [...prev[llm.name], aiMessage],
+        }));
+        setIsTyping((prev) => ({ ...prev, [llm.name]: false }));
+      });
+    }
+
+    setInput(""); // clear input box
   };
 
   const handleNewChat = () => {
     const newChat = { id: Date.now(), title: `Chat ${chats.length + 1}`, subtitle: 'New Conversation' };
     setChats([...chats, newChat]);
     setActiveChat(newChat.id);
-    setMessages({ ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], CloudSonar: [] });
+    setMessages({ ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] });
   };
 
   const handleDeleteChat = (chatId) => {
@@ -135,7 +185,7 @@ const Home = () => {
     setChats(updatedChats);
     if (activeChat === chatId) {
       setActiveChat(updatedChats[0].id);
-      setMessages({ ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], CloudSonar: [] });
+      setMessages({ ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] });
     }
   };
 

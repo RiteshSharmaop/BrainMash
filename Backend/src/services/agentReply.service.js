@@ -4,8 +4,8 @@ const openai = new OpenAI({
   baseURL: process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
   defaultHeaders: {
-    "HTTP-Referer": "<YOUR_SITE_URL>", 
-    "X-Title": "<YOUR_SITE_NAME>", 
+    "HTTP-Referer": "http://localhost:8000",
+    "X-Title": "AiFiesta Hub",
   },
 });
 

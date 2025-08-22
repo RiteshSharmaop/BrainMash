@@ -5,7 +5,11 @@ import agentResponseService from "../services/agentReply.service.js";
 
 const handlePrompt = asyncHandler(async (req, res) => {
   const { prompt, selectedLLMs } = req.body;
-
+  if (!prompt || !selectedLLMs || !Array.isArray(selectedLLMs)) {
+        return res
+      .status(401)
+      .json(new ApiError(401, "Either prompt or selectedLLMs is empty"));
+  }
   try {
     // Run all LLM calls in parallel
     const resultsArray = await Promise.all(
