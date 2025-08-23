@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, MessageCircle, Mail, Lock, ArrowRight, Github, Chrome } from 'lucide-react';
-import { LOGO_URL, NAME } from '../../constants';
+import { LOGO_URL, NAME } from '../constants';
 
 // Particle Background Component
 const ParticleBackground = () => {

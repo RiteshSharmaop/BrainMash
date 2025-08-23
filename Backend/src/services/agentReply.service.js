@@ -18,6 +18,7 @@ const supportsVision = (llm) => {
   );
 };
 
+let conversationHistory = [];
 const agentResponseService = async (llm, prompt) => {
   const content = [{ type: "text", text: prompt }];
 
@@ -29,7 +30,8 @@ const agentResponseService = async (llm, prompt) => {
       },
     });
   }
-
+  
+  conversationHistory.push({ role: "user", content: prompt });
   const completion = await openai.chat.completions.create({
     model: llm,
     messages: [
@@ -42,6 +44,7 @@ const agentResponseService = async (llm, prompt) => {
   });
   
   const msg = completion.choices[0].message;
+  conversationHistory.push({ role: "assistant", content: msg.content });
   return msg.content || msg // fallback if content is missing
 };
 

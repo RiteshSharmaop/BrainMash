@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, MessageCircle, User, Mail, Lock, ArrowRight, Github, Chrome } from 'lucide-react';
-import { LOGO_URL, NAME } from '../../constants';
+import { Eye, EyeOff, MessageCircle, User, Mail, Lock, ArrowRight, Github, Chrome, CloudCog } from 'lucide-react';
+import { LOGO_URL, NAME } from '../constants';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
+
+
+
 
 // Particle Background Component
 const ParticleBackground = () => {
@@ -56,7 +62,7 @@ const SignupPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  
+  const navigate = useNavigate();
   const [signupData, setSignupData] = useState({
     fullName: '',
     email: '',
@@ -65,26 +71,60 @@ const SignupPage = () => {
   });
 
   const handleSignup = async () => {
-    // Basic validation
     if (signupData.password !== signupData.confirmPassword) {
       alert('Passwords do not match!');
       return;
     }
-    
+
     if (!acceptTerms) {
       alert('Please accept the Terms of Service and Privacy Policy');
       return;
     }
-    
+
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/user/register",
+        {
+          fullName: signupData.fullName,
+          email: signupData.email,
+          password: signupData.password,
+          confirmPassword: signupData.confirmPassword,
+        },
+        { withCredentials: true }
+      );
+
+      // success
+      const data = response.data.data;
+      localStorage.setItem("token", data.token);
+      navigate("/chat");
+
+      
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 409) {
+          // specific: user exists
+          alert("User with this email already exists ❌");
+        } else {
+          // other backend errors
+          alert(err.response.data.message || "Something went wrong ❌");
+        }
+      } else {
+        // network or unknown error
+        alert("Network error. Try again later ❌");
+      }
+    } finally {
       setIsLoading(false);
-      console.log('Signup attempted with:', signupData);
-      // Handle signup logic here
-    }, 1500);
+      setSignupData({
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+    }
   };
+
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && signupData.fullName && signupData.email && signupData.password && signupData.confirmPassword && acceptTerms) {

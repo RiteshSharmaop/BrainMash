@@ -20,8 +20,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 import chatRoutes from "./routes/chat.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 app.use("/api/chat", chatRoutes);
+app.use("/api/user", userRoutes);
+
 
 
 export default app;
