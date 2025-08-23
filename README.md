@@ -1,0 +1,86 @@
+# todo
+- change logo in slidbar while doing small (slidbar closing)
+- while adding new comve it not showing icon of new chat in slidbar closing
+- add logout button
+
+
+
+
+# user
+- register page
+- register backend
+- register page frontend and backend integration (cookit storege in local storage)
+    - after register navigate to chat page
+- user wrapper for secure auth (user protected site and cookie register )
+- user log-out and cookit deletion and storing in db (blacklist schema)
+
+
+# 💳 Payment Integration (Slice) - TODO
+
+## 1. Account Setup
+- [ ] Create a Slice developer account.  
+- [ ] Get **API keys** (test + live).
+
+---
+
+## 2. Backend Setup
+- [ ] Install Slice SDK / required NPM package.  
+- [ ] Create a new file `payment.routes.js`.  
+- [ ] Add API endpoints:
+  - `POST /api/payment/create-order` → Creates a payment order with amount, currency, etc.  
+  - `POST /api/payment/verify` → Verifies transaction signature from Slice.  
+- [ ] Store successful transactions in **DB (transactions schema)**.
+
+---
+
+## 3. Frontend Setup
+- [ ] Install Slice SDK for frontend.  
+- [ ] Create **Payment UI Component** (checkout button / modal).  
+- [ ] Call backend `create-order` API to generate order details.  
+- [ ] Use **Slice Checkout** popup for user payment.  
+- [ ] After payment, call backend `verify` API for confirmation.
+
+---
+
+## 4. Database
+- [ ] Create `Transaction` schema with fields:
+  - `userId`  
+  - `amount`  
+  - `status` (pending, success, failed)  
+  - `transactionId`  
+  - `timestamp`
+
+---
+
+## 5. Authentication & Security
+- [ ] Store API keys in `.env`.  
+- [ ] Use server-side only for sensitive operations (order creation, verification).  
+- [ ] Validate webhook responses with Slice signature.
+
+---
+
+## 6. Webhooks
+- [ ] Set up webhook endpoint `POST /api/payment/webhook` to receive payment status updates.  
+- [ ] Update DB transaction status accordingly.
+
+---
+
+## 7. Testing
+- [ ] Use **Slice sandbox mode** for test payments.  
+- [ ] Test flows:
+  - Success ✅  
+  - Failure ❌  
+  - Cancellation 🚫  
+
+---
+
+## 8. UI / UX
+- [ ] Show payment history in user dashboard.  
+- [ ] Add loader / success / error messages.  
+- [ ] Redirect user after payment success.  
+
+---
+
+✔ Once all tasks are done → Payment system will be fully integrated with secure backend verification + transaction storage.  
+
+
