@@ -5,17 +5,40 @@
 
 
 
+<!-- Main content -->
+# Home Page (IMP)
+- create slide bar ✅
+    - add payment bar
+    - add llm bar
+    - add previous chat 
+- create LLM chat component ✅
+- api integration ✅
+    - create id at openRouter 
+    - create key and use 
+
+
+
+
+# Pages
+- create register page ✅
+- create login page ✅
+
+
+# Backend
+- create register backend ✅
+- create register backend ❌
+
 
 # user
-- register page
-- register backend
-- register page frontend and backend integration (cookit storege in local storage)
-    - after register navigate to chat page
+- register page ✅
+- register backend ✅
+- register page frontend and backend integration (cookit storege in local storage) ✅
+    - after register navigate to chat page ✅
 - user wrapper for secure auth (user protected site and cookie register )
 - user log-out and cookit deletion and storing in db (blacklist schema)
 
 
-# 💳 Payment Integration (Slice) - TODO
+# 💳 Payment Integration (Slice) - TODO ❌
 
 ## 1. Account Setup
 - [ ] Create a Slice developer account.  
