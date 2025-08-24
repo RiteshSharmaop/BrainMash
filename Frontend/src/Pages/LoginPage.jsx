@@ -71,8 +71,8 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { setUser, setToken } = useContext(UserDataContext);
   const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
+    email: "test@test.com",
+    password: "testtest",
   });
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -280,7 +280,9 @@ const LoginPage = () => {
           {/* Sign Up Link */}
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-400">Don't have an account? </span>
-            <button className="text-purple-400 hover:text-purple-300 font-medium">
+            <button onClick={()=>{
+              navigate('/register')
+            }} className="text-purple-400 hover:text-purple-300 font-medium">
               Sign up
             </button>
           </div>

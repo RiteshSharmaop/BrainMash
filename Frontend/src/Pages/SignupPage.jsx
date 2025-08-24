@@ -70,19 +70,17 @@ const SignupPage = () => {
     confirmPassword: ''
   });
 
-  setIsLoading(true);
   const handleSignup = async () => {
     if (signupData.password !== signupData.confirmPassword) {
       alert('Passwords do not match!');
       return;
     }
-
+    
     if (!acceptTerms) {
       alert('Please accept the Terms of Service and Privacy Policy');
       return;
     }
-
-    setIsLoading(false);
+    setIsLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:8000/api/user/register",
@@ -328,7 +326,9 @@ const SignupPage = () => {
           {/* Login Link */}
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-400">Already have an account? </span>
-            <button className="text-purple-400 hover:text-purple-300 font-medium">
+            <button onClick={()=>{
+              navigate("/login")
+            }} className="text-purple-400 hover:text-purple-300 font-medium">
               Sign in
             </button>
           </div>
