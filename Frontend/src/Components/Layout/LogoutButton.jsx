@@ -1,0 +1,36 @@
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
+
+export default function LogoutButton() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}api/user/logout/`,
+        { withCredentials: true }
+      );
+
+      
+
+      if (response.status === 201) {
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert(error.response?.data?.message || "Logout failed");
+    }
+  };
+
+  return (
+    <div className="relative group">
+      <button
+        onClick={handleLogout}
+        className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition"
+      >
+        <LogOut size={16} />
+      </button>
+    </div>
+  );
+}

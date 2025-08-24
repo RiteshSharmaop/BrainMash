@@ -2,6 +2,7 @@ import React from "react";
 import { Sparkles, Crown, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import ChatHistory from "../Chat/ChatHistory";
 import { LOGO_URL, NAME } from "../../constants";
+import LogoutButton from "./LogoutButton";
 
 const Sidebar = ({
   sidebarWidth,
@@ -109,8 +110,21 @@ const Sidebar = ({
         /* Collapsed Sidebar */
         <div className="p-2 flex flex-col items-center gap-4 mt-16">
           <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-            <Sparkles size={18} className="text-white" />
+            <iframe
+              src={LOGO_URL}
+              width="40"
+              height="40"
+              frameBorder="0"
+              className="giphy-embed rounded-2xl shadow-lg"
+              allowFullScreen
+              title="gif-chimpanzee"
+              ></iframe>
           </div>
+
+          {/* Log out */}
+          <LogoutButton />
+
+
           <button
             onClick={handleNewChat}
             className="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center transition-colors"
