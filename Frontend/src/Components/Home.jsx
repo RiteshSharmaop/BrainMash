@@ -21,6 +21,11 @@ const Home = () => {
     Perplexity: [],
     Lama: []
   });
+  const [chatMessages, setChatMessages] = useState({
+    1: { ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] },
+    2: { ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] },
+  });
+
 
   const [isTyping, setIsTyping] = useState({
     ChatGPT: false,
@@ -43,8 +48,8 @@ const Home = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [chats, setChats] = useState([
-    { id: 1, title: "Chat 1", subtitle: "General Discussion" },
-    { id: 2, title: "Chat 2", subtitle: "Project Planning" },
+    { id: 1, title: "Chat 1", subtitle: "New Conversation" },
+    { id: 2, title: "Chat 2", subtitle: "New Conversation" },
   ]);
   const [activeChat, setActiveChat] = useState(1);
 
@@ -98,86 +103,80 @@ const Home = () => {
 
     const userMessage = { type: "user", content: input, time: new Date().toLocaleTimeString() };
 
-    // Add user message to all visible LLMs
-    setMessages((prev) => {
-      const updated = {};
-      Object.keys(prev).forEach((llm) => {
-        updated[llm] = [...prev[llm], userMessage];
-      });
-      return updated;
-    });
+    // Add user message to current chat only
+    setChatMessages(prev => ({
+      ...prev,
+      [activeChat]: Object.fromEntries(
+        Object.entries(prev[activeChat]).map(([llm, msgs]) => [llm, [...msgs, userMessage]])
+      )
+    }));
 
-    // Set typing indicator ON
-    setIsTyping((prev) => {
+    // Set typing indicator per LLM for current chat
+    setIsTyping(prev => {
       const updated = {};
-      Object.keys(prev).forEach((llm) => {
+      Object.keys(prev).forEach(llm => {
         updated[llm] = visibleLLMs[llm];
       });
       return updated;
     });
 
+    // Your API call logic remains the same, but updates should be done on current chat:
     try {
-      // Build request payload
       const selectedLLMs = llmConfigs
-        .filter((llm) => visibleLLMs[llm.name])
-        .map((llm) => llm.model);
+      .filter(llm => visibleLLMs[llm.name])
+      .map(llm => llm.model);
 
-      const res = await axios.post("http://localhost:8000/api/chat/", {
-        prompt: input,
-        selectedLLMs,
+      const res = await axios.post("http://localhost:8000/api/chat/", { 
+        prompt: input, 
+        selectedLLMs 
       });
-
       const data = res.data;
 
       if (data.success) {
-        const results = data.data; // { "openai/gpt-4o-mini": "...", "google/gemini-2.5-flash": "..." }
-
-        // Add AI replies per model
-        llmConfigs.forEach((llm) => {
+        const results = data.data;
+        llmConfigs.forEach(llm => {
           if (!visibleLLMs[llm.name]) return;
 
-          const aiMessage = {
-            type: "ai",
-            content: results[llm.model] || "⚠️ No response",
-            time: new Date().toLocaleTimeString(),
+          const aiMessage = { 
+            type: "ai", 
+            content: results[llm.model] || "⚠️ No response", 
+            time: new Date().toLocaleTimeString() 
           };
-
-          setMessages((prev) => ({
+          
+          setChatMessages(prev => ({
             ...prev,
-            [llm.name]: [...prev[llm.name], aiMessage],
+            [activeChat]: {
+              ...prev[activeChat],
+              [llm.name]: [...prev[activeChat][llm.name], aiMessage]
+            }
           }));
-
-          setIsTyping((prev) => ({ ...prev, [llm.name]: false }));
+          setIsTyping(prev => ({ 
+            ...prev, 
+            [llm.name]: false }));
         });
-      } else {
-        console.error("Backend error:", data.message);
       }
     } catch (err) {
-      console.error("Request failed:", err);
-      llmConfigs.forEach((llm) => {
-        if (!visibleLLMs[llm.name]) return;
-        const aiMessage = {
-          type: "ai",
-          content: "⚠️ Error contacting backend",
-          time: new Date().toLocaleTimeString(),
-        };
-        setMessages((prev) => ({
-          ...prev,
-          [llm.name]: [...prev[llm.name], aiMessage],
-        }));
-        setIsTyping((prev) => ({ ...prev, [llm.name]: false }));
-      });
+      console.error(err);
     }
 
-    setInput(""); // clear input box
+    setInput("");
   };
 
+
   const handleNewChat = () => {
-    const newChat = { id: Date.now(), title: `Chat ${chats.length + 1}`, subtitle: 'New Conversation' };
+    const newId = Date.now();
+    const newChat = { id: newId, title: `Chat ${chats.length + 1}`, subtitle: 'New Conversation' };
+    
     setChats([...chats, newChat]);
-    setActiveChat(newChat.id);
-    setMessages({ ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] });
+    setActiveChat(newId);
+
+    // Initialize messages for this new chat
+    setChatMessages(prev => ({
+      ...prev,
+      [newId]: { ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] }
+    }));
   };
+
 
   const handleDeleteChat = (chatId) => {
     if (chats.length <= 1) return;
@@ -221,7 +220,8 @@ const Home = () => {
               name={llm.name}
               model={llm.model}
               color={llm.color}
-              messages={messages[llm.name]}
+              // messages={messages[llm.name]}
+              messages={chatMessages[activeChat]?.[llm.name] || []}
               isTyping={isTyping[llm.name]}
               onClose={handleCloseLLM}
               isVisible={visibleLLMs[llm.name]}

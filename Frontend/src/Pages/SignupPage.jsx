@@ -70,6 +70,7 @@ const SignupPage = () => {
     confirmPassword: ''
   });
 
+  setIsLoading(true);
   const handleSignup = async () => {
     if (signupData.password !== signupData.confirmPassword) {
       alert('Passwords do not match!');
@@ -81,8 +82,7 @@ const SignupPage = () => {
       return;
     }
 
-    setIsLoading(true);
-
+    setIsLoading(false);
     try {
       const response = await axios.post(
         "http://localhost:8000/api/user/register",

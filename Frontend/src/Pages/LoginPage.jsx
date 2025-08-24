@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, MessageCircle, Mail, Lock, ArrowRight, Github, Chrome } from 'lucide-react';
-import { LOGO_URL, NAME } from '../constants';
+import React, { useState, useEffect } from "react";
+import {
+  Eye,
+  EyeOff,
+  MessageCircle,
+  Mail,
+  Lock,
+  ArrowRight,
+  Github,
+  Chrome,
+} from "lucide-react";
+import { LOGO_URL, NAME } from "../constants";
 
 // Particle Background Component
 const ParticleBackground = () => {
@@ -22,11 +31,13 @@ const ParticleBackground = () => {
     setParticles(particleArray);
 
     const interval = setInterval(() => {
-      setParticles(prev => prev.map(particle => ({
-        ...particle,
-        x: (particle.x + particle.speedX + 100) % 100,
-        y: (particle.y + particle.speedY + 100) % 100,
-      })));
+      setParticles((prev) =>
+        prev.map((particle) => ({
+          ...particle,
+          x: (particle.x + particle.speedX + 100) % 100,
+          y: (particle.y + particle.speedY + 100) % 100,
+        }))
+      );
     }, 50);
 
     return () => clearInterval(interval);
@@ -34,7 +45,7 @@ const ParticleBackground = () => {
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map(particle => (
+      {particles.map((particle) => (
         <div
           key={particle.id}
           className="absolute rounded-full bg-purple-400/30"
@@ -55,23 +66,34 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   const handleLogin = async () => {
+    e.preventDefault();
     setIsLoading(true);
+
+    const userData = loginData;
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      console.log('Login attempted with:', loginData);
-      // Handle login logic here
-    }, 1500);
+    setIsLoading(false);
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/users/login`,
+      userData
+    );
+    if (response.status === 201) {
+      const data = response.data.data;
+
+      setUser(data.user);
+      localStorage.setItem("token", data.token);
+      navigate("/home");
+    }
+    
+
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && loginData.email && loginData.password) {
+    if (e.key === "Enter" && loginData.email && loginData.password) {
       handleLogin();
     }
   };
@@ -79,28 +101,29 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative bg-gray-900 text-white">
       <ParticleBackground />
-      
+
       <div className="w-full max-w-md relative z-10">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center">
-                <iframe
-                    src={LOGO_URL}
-                    width="51"
-                    height="51"
-                    frameBorder="0"
-                    className="giphy-embed rounded-2xl shadow-lg"
-                    allowFullScreen
-                    title="gif-chimpanzee"
-                ></iframe>
-
+              <iframe
+                src={LOGO_URL}
+                width="51"
+                height="51"
+                frameBorder="0"
+                className="giphy-embed rounded-2xl shadow-lg"
+                allowFullScreen
+                title="gif-chimpanzee"
+              ></iframe>
             </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
               {NAME}
             </h1>
           </div>
-          <h2 className="text-2xl font-semibold text-white mb-2">Welcome back</h2>
+          <h2 className="text-2xl font-semibold text-white mb-2">
+            Welcome back
+          </h2>
         </div>
 
         {/* Login Form */}
@@ -116,7 +139,9 @@ const LoginPage = () => {
                 <input
                   type="email"
                   value={loginData.email}
-                  onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                  onChange={(e) =>
+                    setLoginData({ ...loginData, email: e.target.value })
+                  }
                   onKeyPress={handleKeyPress}
                   className="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Enter your email"
@@ -134,7 +159,9 @@ const LoginPage = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   value={loginData.password}
-                  onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                  onChange={(e) =>
+                    setLoginData({ ...loginData, password: e.target.value })
+                  }
                   onKeyPress={handleKeyPress}
                   className="w-full bg-gray-700/50 border border-gray-600/50 rounded-xl pl-10 pr-12 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="Enter your password"
@@ -144,7 +171,11 @@ const LoginPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -152,10 +183,16 @@ const LoginPage = () => {
             {/* Remember & Forgot */}
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center text-gray-300">
-                <input type="checkbox" className="rounded border-gray-600 bg-gray-700 mr-2" />
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-600 bg-gray-700 mr-2"
+                />
                 Remember me
               </label>
-              <button type="button" className="text-purple-400 hover:text-purple-300">
+              <button
+                type="button"
+                className="text-purple-400 hover:text-purple-300"
+              >
                 Forgot password?
               </button>
             </div>
@@ -182,7 +219,9 @@ const LoginPage = () => {
                 <div className="w-full border-t border-gray-600"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-900/50 text-gray-400">Or continue with</span>
+                <span className="px-2 bg-gray-900/50 text-gray-400">
+                  Or continue with
+                </span>
               </div>
             </div>
 
