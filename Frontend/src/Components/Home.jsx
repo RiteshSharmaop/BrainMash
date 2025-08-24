@@ -126,7 +126,7 @@ const Home = () => {
       .filter(llm => visibleLLMs[llm.name])
       .map(llm => llm.model);
 
-      const res = await axios.post(`${VITE_BACKEND_URL}/api/chat/`, { 
+      const res = await axios.post(`${VITE_BACKEND_URL}api/chat/`, { 
         prompt: input, 
         selectedLLMs 
       });
