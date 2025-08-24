@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { BlacklistToken } from "../models/blacklistToken.model.js";
 
 const userRegister = asyncHandler(async (req, res) => {
     try {

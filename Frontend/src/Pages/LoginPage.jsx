@@ -10,6 +10,8 @@ import {
   Chrome,
 } from "lucide-react";
 import { LOGO_URL, NAME } from "../constants";
+import axios from 'axios';
+import { useNavigate } from "react-router-dom";
 
 // Particle Background Component
 const ParticleBackground = () => {
@@ -63,35 +65,64 @@ const ParticleBackground = () => {
 };
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
-
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    const userData = loginData;
     
-    setIsLoading(false);
-    const response = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}/users/login`,
-      userData
-    );
-    if (response.status === 201) {
-      const data = response.data.data;
 
-      setUser(data.user);
-      localStorage.setItem("token", data.token);
-      navigate("/home");
+    const {email , password} = loginData;
+
+    if (!email.trim() || !password.trim()) {
+      alert('Passwords do not match!');
+      return;
     }
-    
 
+    try {
+      setIsLoading(true);
+
+      const res = await axios.post(
+        "http://localhost:8000/api/user/login", // adjust URL as needed
+        { email, password },
+        { withCredentials: true } // ensures cookies are sent/received
+      );
+
+      if (res.status === 201) {
+        const data = res.data.data;
+
+      
+        localStorage.setItem("token", data.token);
+        navigate("/chat");
+      }
+
+     
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 404) {
+          // specific: user exists
+          alert("User with this email not exists ❌");
+        }else if(err.response.status === 400) {
+          alert("write correct email or password ❌");
+          
+        } else {
+          // other backend errors
+          alert(err.response.data.message || "Something went wrong ❌");
+        }
+      } else {
+        // network or unknown error
+        alert("Network error. Try again later ❌");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && loginData.email && loginData.password) {
       handleLogin();
