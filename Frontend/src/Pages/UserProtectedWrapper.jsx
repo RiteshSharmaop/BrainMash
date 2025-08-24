@@ -17,7 +17,7 @@ function UserProtectedWrapper({ children }) {
 
     // Fetch user details
     axios
-      .get(`${VITE_BACKEND_URL}api/user/me`, {
+      .get(`${import.meta.env.VITE_BACKEND_URL}api/user/me`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
