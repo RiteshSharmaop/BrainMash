@@ -6,9 +6,9 @@ https://brainmash-1.onrender.com/
 
 # todo
 
-- change logo in slidbar while doing small (slidbar closing)
+- change logo in slidbar while doing small (slidbar closing) ✅
 - while adding new comve it not showing icon of new chat in slidbar closing
-- add logout button
+- add logout button✅
 - chat fet details to is visible in slidbar
 
 <!-- Main content -->
@@ -17,12 +17,12 @@ https://brainmash-1.onrender.com/
 
 - create slide bar ✅
   - add payment bar
-  - add llm bar
+  - add llm bar ✅
   - add previous chat
 - create LLM chat component ✅
 - api integration ✅
-  - create id at openRouter
-  - create key and use
+  - create id at openRouter ✅
+  - create key and use ✅
 
 # Pages
 
@@ -32,7 +32,7 @@ https://brainmash-1.onrender.com/
 # Backend
 
 - create register backend ✅
-- create register backend ❌
+- create register backend ✅
 
 # user
 
@@ -40,8 +40,8 @@ https://brainmash-1.onrender.com/
 - register backend ✅
 - register page frontend and backend integration (cookit storege in local storage) ✅
   - after register navigate to chat page ✅
-- user wrapper for secure auth (user protected site and cookie register )
-- user log-out and cookit deletion and storing in db (blacklist schema)
+- user wrapper for secure auth (user protected site and cookie register )✅
+- user log-out and cookit deletion and storing in db (blacklist schema)✅
 
 # 💳 Payment Integration (Slice) - TODO ❌
 
