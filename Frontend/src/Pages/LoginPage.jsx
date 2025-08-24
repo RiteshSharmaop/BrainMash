@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Eye,
   EyeOff,
@@ -12,6 +12,7 @@ import {
 import { LOGO_URL, NAME } from "../constants";
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
+import { UserDataContext } from "../context/UserContext";
 
 // Particle Background Component
 const ParticleBackground = () => {
@@ -68,6 +69,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { setUser, setToken } = useContext(UserDataContext);
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
@@ -94,8 +96,8 @@ const LoginPage = () => {
 
       if (res.status === 201) {
         const data = res.data.data;
-
-      
+        setToken(data.token);   // stores in state + localStorage
+        setUser({ email: data.email, fullName: data.fullName });
         localStorage.setItem("token", data.token);
         navigate("/chat");
       }

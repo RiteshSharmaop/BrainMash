@@ -122,8 +122,14 @@ const userLogin = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Password");
     }
     const token = user.generateAuthToken();
-    console.log("Token : ", token);
-    res.cookie("token", token);
+
+    // Set cookie
+    res.cookie("token", token, {
+        httpOnly: true, // cannot be accessed by JS
+        secure: process.env.NODE_ENV === "production", // only https in prod
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
     return res
         .status(201)
         .json(new ApiResponse(201, { token, user }, "User Login Successfully"));

@@ -106,7 +106,10 @@ const SignupPage = () => {
         if (err.response.status === 409) {
           // specific: user exists
           alert("User with this email already exists ❌");
-        } else {
+        } else if (err.response.status === 400) {
+          // specific: user exists
+          alert("write correct details❌");
+        }else {
           // other backend errors
           alert(err.response.data.message || "Something went wrong ❌");
         }
