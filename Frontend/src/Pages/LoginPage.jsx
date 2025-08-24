@@ -89,7 +89,7 @@ const LoginPage = () => {
       setIsLoading(true);
 
       const res = await axios.post(
-        "http://localhost:8000/api/user/login", // adjust URL as needed
+        `${import.meta.env.VITE_BACKEND_URL}api/user/login`, // adjust URL as needed
         { email, password },
         { withCredentials: true } // ensures cookies are sent/received
       );

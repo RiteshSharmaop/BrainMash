@@ -83,7 +83,7 @@ const SignupPage = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/user/register",
+        `${import.meta.env.VITE_BACKEND_URL}api/user/register`,
         {
           fullName: signupData.fullName,
           email: signupData.email,
