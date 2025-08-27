@@ -17,9 +17,9 @@ function App() {
         <Route path='/login' element= {<LoginPage/>}/>
         <Route path='/register' element= {<SignupPage/>}/>
         <Route path='/chat' element={
-          <UserProtectedWrapper>
+          // <UserProtectedWrapper>
             <Home />
-          </UserProtectedWrapper>
+          // </UserProtectedWrapper>
         } />
       </Routes>
       

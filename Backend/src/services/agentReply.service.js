@@ -48,4 +48,4 @@ const agentResponseService = async (llm, prompt) => {
   return msg.content || msg // fallback if content is missing
 };
 
-export default agentResponseService;
+export { agentResponseService};

@@ -2,8 +2,6 @@
 https://brainmash-1.onrender.com/
 
 
-# ask for refferal
-
 # todo
 
 - change logo in slidbar while doing small (slidbar closing) ✅
@@ -42,6 +40,15 @@ https://brainmash-1.onrender.com/
   - after register navigate to chat page ✅
 - user wrapper for secure auth (user protected site and cookie register )✅
 - user log-out and cookit deletion and storing in db (blacklist schema)✅
+
+
+
+
+# multi llm functionality
+- backend controller and services✅
+- frontend ✅
+- improve prompt ❌
+
 
 # 💳 Payment Integration (Slice) - TODO ❌
 

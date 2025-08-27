@@ -11,7 +11,7 @@ const Home = () => {
     Gemini: true,
     DeepSeek: true,
     Perplexity: true,
-    Lama: true
+    Lama: true,
   });
 
   const [messages, setMessages] = useState({
@@ -46,12 +46,18 @@ const Home = () => {
   const [input, setInput] = useState("");
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
+  // state for Multi-LLM messages + typing
+  
+  
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [showMultiLLMBox, setShowMultiLLMBox] = useState(false);
   const [chats, setChats] = useState([
     { id: 1, title: "Chat 1", subtitle: "New Conversation" },
     { id: 2, title: "Chat 2", subtitle: "New Conversation" },
   ]);
   const [activeChat, setActiveChat] = useState(1);
+  const [multiLLMMessages, setMultiLLMMessages] = useState([]);
+  const [multiLLMTyping, setMultiLLMTyping] = useState(false);
 
   const handleCloseLLM = (llmName) => {
     setVisibleLLMs(prev => ({ ...prev, [llmName]: false }));
@@ -98,69 +104,95 @@ const Home = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  e.preventDefault();
+  if (!input.trim()) return;
 
-    const userMessage = { type: "user", content: input, time: new Date().toLocaleTimeString() };
+  const userMessage = { 
+    type: "user", 
+    content: input, 
+    time: new Date().toLocaleTimeString() 
+  };
 
-    // Add user message to current chat only
-    setChatMessages(prev => ({
-      ...prev,
-      [activeChat]: Object.fromEntries(
-        Object.entries(prev[activeChat]).map(([llm, msgs]) => [llm, [...msgs, userMessage]])
-      )
-    }));
+  // ✅ Add user message to all visible LLMs in current chat
+  setChatMessages(prev => ({
+    ...prev,
+    [activeChat]: Object.fromEntries(
+      Object.entries(prev[activeChat]).map(([llm, msgs]) => [
+        llm,
+        [...msgs, userMessage],
+      ])
+    ),
+  }));
 
-    // Set typing indicator per LLM for current chat
-    setIsTyping(prev => {
-      const updated = {};
-      Object.keys(prev).forEach(llm => {
-        updated[llm] = visibleLLMs[llm];
-      });
-      return updated;
+  // ✅ Also add to Multi-LLM (if open)
+  if (showMultiLLMBox) {
+    setMultiLLMMessages(prev => [...prev, userMessage]);
+    setMultiLLMTyping(true);
+  }
+
+  // ✅ Set typing indicators
+  setIsTyping(prev => {
+    const updated = {};
+    Object.keys(prev).forEach(llm => {
+      updated[llm] = visibleLLMs[llm];
     });
+    return updated;
+  });
 
-    // Your API call logic remains the same, but updates should be done on current chat:
-    try {
-      const selectedLLMs = llmConfigs
+  try {
+    const selectedLLMs = llmConfigs
       .filter(llm => visibleLLMs[llm.name])
       .map(llm => llm.model);
 
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/chat/`, { 
+    const res = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}api/chat/`,
+      { 
         prompt: input, 
-        selectedLLMs 
-      });
-      const data = res.data;
-
-      if (data.success) {
-        const results = data.data;
-        llmConfigs.forEach(llm => {
-          if (!visibleLLMs[llm.name]) return;
-
-          const aiMessage = { 
-            type: "ai", 
-            content: results[llm.model] || "⚠️ No response", 
-            time: new Date().toLocaleTimeString() 
-          };
-          
-          setChatMessages(prev => ({
-            ...prev,
-            [activeChat]: {
-              ...prev[activeChat],
-              [llm.name]: [...prev[activeChat][llm.name], aiMessage]
-            }
-          }));
-          setIsTyping(prev => ({ 
-            ...prev, 
-            [llm.name]: false }));
-        });
+        selectedLLMs,
+        isMultiLLM: showMultiLLMBox 
       }
-    } catch (err) {
-      console.error(err);
-    }
+    );
 
-    setInput("");
-  };
+    const data = res.data;
+
+    if (data.success) {
+      const results = data.data.results;
+
+      // --- Normal LLM responses ---
+      llmConfigs.forEach(llm => {
+        if (!visibleLLMs[llm.name]) return;
+        const aiMessage = { 
+          type: "ai", 
+          content: results[llm.model] || "⚠️ No response", 
+          time: new Date().toLocaleTimeString() 
+        };
+        setChatMessages(prev => ({
+          ...prev,
+          [activeChat]: {
+            ...prev[activeChat],
+            [llm.name]: [...prev[activeChat][llm.name], aiMessage],
+          },
+        }));
+        setIsTyping(prev => ({ ...prev, [llm.name]: false }));
+      });
+
+      // --- Multi-LLM response ---
+      if (showMultiLLMBox && data.data.multiLLMResponse) {
+        const aiMessage = {
+          type: "ai",
+          content: data.data.multiLLMResponse,
+          time: new Date().toLocaleTimeString(),
+        };
+        setMultiLLMMessages(prev => [...prev, aiMessage]);
+        setMultiLLMTyping(false);
+      }
+    }
+  } catch (err) {
+    console.error("❌ Error in handleSubmit:", err);
+  }
+
+  setInput("");
+};
 
 
   const handleNewChat = () => {
@@ -209,8 +241,13 @@ const Home = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full relative z-10">
+        
+
+
+
+
         {/* LLM Columns */}
-        <div
+        {/* <div
           className="flex-1 grid gap-4 p-6 overflow-hidden"
           style={{ gridTemplateColumns: `repeat(${getVisibleLLMs().length}, 1fr)` }}
         >
@@ -227,11 +264,57 @@ const Home = () => {
               isVisible={visibleLLMs[llm.name]}
             />
           ))}
-        </div>
+        </div> */}
+        
+        {/* LLM Columns */}
+  <div
+    className="flex-1 grid gap-4 p-6 overflow-hidden"
+    style={{ gridTemplateColumns: `repeat(${getVisibleLLMs().length + (showMultiLLMBox ? 1 : 0)}, 1fr)` }}
+  >
+    {/* Multi-LLM column appears first if enabled */}
+    {showMultiLLMBox && (
+      <LLMColumn
+        key="Multi-LLM"
+        name="Multi-LLM"
+        model="multi-llm"
+        color="bg-pink-600"
+        messages={multiLLMMessages}
+        isTyping={multiLLMTyping}
+        onClose={() => setShowMultiLLMBox(false)}
+        isVisible={true}
+      />
+    )}
 
+    {/* Other LLMs */}
+    {getVisibleLLMs().map((llm) => (
+      <LLMColumn
+        key={llm.name}
+        name={llm.name}
+        model={llm.model}
+        color={llm.color}
+        messages={chatMessages[activeChat]?.[llm.name] || []}
+        isTyping={isTyping[llm.name]}
+        onClose={handleCloseLLM}
+        isVisible={visibleLLMs[llm.name]}
+      />
+    ))}
+  </div>
+          
+
+        
         {/* Input Area */}
         <div className="p-6 border-t border-gray-700/50 bg-gray-800/30 backdrop-blur-md">
           <div className="flex gap-4">
+            {/* Multi-LLM Button */}
+            <button
+              onClick={() => setShowMultiLLMBox(prev => !prev)}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2"
+            >
+              Multi-LLM
+            </button>
+
+
+
             <input
               type="text"
               value={input}
@@ -250,6 +333,9 @@ const Home = () => {
             </button>
           </div>
         </div>
+
+
+        
       </div>
     </div>
   );
