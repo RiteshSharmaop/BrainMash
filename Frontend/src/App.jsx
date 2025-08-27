@@ -5,9 +5,12 @@ import SignupPage from "./Pages/SignupPage"
 import { Navigate, Route, Routes } from 'react-router-dom'
 import UserProtectedWrapper from "./Pages/UserProtectedWrapper"
 import Loading from "./Components/Loading"
+import Payment from "./Components/Payment/Payment"
+import { useState } from "react"
 
 
 function App() {
+  const [paymentDone, setPaymentDone] = useState(false);
   return (
 
     <>
@@ -17,10 +20,14 @@ function App() {
         <Route path='/login' element= {<LoginPage/>}/>
         <Route path='/register' element= {<SignupPage/>}/>
         <Route path='/chat' element={
-          // <UserProtectedWrapper>
-            <Home />
-          // </UserProtectedWrapper>
+          <UserProtectedWrapper>
+            <Home paymentDone={paymentDone} setPaymentDone={setPaymentDone}  />
+          </UserProtectedWrapper>
         } />
+      <Route
+        path="/payment"
+        element={<Payment setPaymentDone={setPaymentDone} />}
+      />
       </Routes>
       
     </>

@@ -4,7 +4,6 @@ import {agentResponseService} from "../services/agentReply.service.js";
 
 const getMultiLLMResult = async (results) => {
   
-  console.log(results);
   
 
   const consolidationPrompt = `
@@ -19,7 +18,10 @@ const getMultiLLMResult = async (results) => {
     this is different Large Language Models (LLMs) responses ${JSON.stringify(results)}
   `;
 
+
+  
   const response = await agentResponseService("openai/gpt-4o-mini", consolidationPrompt);
+
   return response;
 };
 

@@ -3,6 +3,7 @@ import { Sparkles, Crown, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import ChatHistory from "../Chat/ChatHistory";
 import { LOGO_URL, NAME } from "../../constants";
 import LogoutButton from "./LogoutButton";
+import { Link } from "react-router-dom";
 
 const Sidebar = ({
   sidebarWidth,
@@ -16,6 +17,8 @@ const Sidebar = ({
   handleDeleteChat,
   getClosedLLMs,
   handleRestoreLLM,
+  paymentDone, 
+  setPaymentDone 
 }) => {
   return (
     <div
@@ -68,9 +71,17 @@ const Sidebar = ({
               <p className="text-xs text-gray-400 mb-3">
                 Unlock unlimited queries and advanced features
               </p>
-              <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm py-2 px-4 rounded-lg transition-all">
+              
+             
+              <Link
+                to="/payment"
+                className=" w-full bg-gradient-to-r from-purple-600 to-blue-600 
+                          hover:from-purple-700 hover:to-blue-700 
+                          text-white text-base font-medium 
+                          py-2 px-1 rounded-xl transition-all shadow-md text-center block"
+              >
                 Upgrade Now
-              </button>
+              </Link>
             </div>
           </div>
 

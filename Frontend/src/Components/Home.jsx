@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { MessageCircle } from "lucide-react";
+import { Lock, MessageCircle } from "lucide-react";
 import axios from "axios"
 import ParticleBackground from "./Layout/ParticleBackground";
 import LLMColumn from "./Chat/LLMColumn";
 import Sidebar from "./Layout/Sidebar";
 
-const Home = () => {
+const Home = ({paymentDone, setPaymentDone }) => {
   const [visibleLLMs, setVisibleLLMs] = useState({
     ChatGPT: true,
     Gemini: true,
@@ -58,6 +58,7 @@ const Home = () => {
   const [activeChat, setActiveChat] = useState(1);
   const [multiLLMMessages, setMultiLLMMessages] = useState([]);
   const [multiLLMTyping, setMultiLLMTyping] = useState(false);
+
 
   const handleCloseLLM = (llmName) => {
     setVisibleLLMs(prev => ({ ...prev, [llmName]: false }));
@@ -237,6 +238,9 @@ const Home = () => {
         handleDeleteChat={handleDeleteChat}
         getClosedLLMs={getClosedLLMs}
         handleRestoreLLM={handleRestoreLLM}
+        paymentDone={paymentDone}
+        setPaymentDone={setPaymentDone}
+        
       />
 
       {/* Main Content */}
@@ -306,11 +310,21 @@ const Home = () => {
         <div className="p-6 border-t border-gray-700/50 bg-gray-800/30 backdrop-blur-md">
           <div className="flex gap-4">
             {/* Multi-LLM Button */}
+            
+           
             <button
-              onClick={() => setShowMultiLLMBox(prev => !prev)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2"
+              onClick={() => paymentDone && setShowMultiLLMBox(prev => !prev)}
+              disabled={!paymentDone}
+              className="relative bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Multi-LLM
+
+              {/* Overlay */}
+              {!paymentDone && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl">
+                  <Lock className="text-white w-5 h-5" />
+                </div>
+              )}
             </button>
 
 
