@@ -17,7 +17,7 @@ function App() {
 
     <>
       <Routes>
-        <Route path='/' element= {<Navigate to="/login" replace />} />
+        <Route path='/' element= {<Navigate to="/chat" replace />} />
 
         <Route path='/login' element= {<LoginPage/>}/>
         <Route path='/register' element= {<SignupPage/>}/>
@@ -28,10 +28,23 @@ function App() {
         } />
       <Route
         path="/payment"
-        element={<Payment setPaymentDone={setPaymentDone} />}
+        element={
+          <UserProtectedWrapper>
+            <Payment setPaymentDone={setPaymentDone} />
+          </UserProtectedWrapper>
+        }
       />
-      <Route path="/payment/success" element={<PaymentSuccess />} />
-      <Route path="/payment/cancel" element={<PaymentCancel />} />
+      <Route path="/success" element={
+        <UserProtectedWrapper>
+          <PaymentSuccess paymentDone={paymentDone} setPaymentDone={setPaymentDone} />
+        </UserProtectedWrapper>
+      } />
+      <Route path="/cancel" element={
+        
+        <UserProtectedWrapper>
+          <PaymentCancel paymentDone={paymentDone} setPaymentDone={setPaymentDone} />
+        </UserProtectedWrapper>
+        } />
       </Routes>
       
     </>

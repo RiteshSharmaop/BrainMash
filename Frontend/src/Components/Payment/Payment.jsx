@@ -1,14 +1,23 @@
+
 import React from "react";
 import { Crown, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ParticleBackground from "../Layout/ParticleBackground";
+import { loadStripe } from "@stripe/stripe-js";
+import axios from "axios";
+
+const stripePromise = loadStripe(import.meta.env.VITE_PUBLISHABLE_KEY);
+
 
 const Payment = ({ setPaymentDone }) => {
   const navigate = useNavigate();
 
-  const handlePayment = () => {
-    // ⚡ Replace this with Razorpay / Stripe later
-    navigate("/payment/success");
+  const handlePayment = async() => {
+    const stripe = await stripePromise;
+    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/payment/create-checkout-session`);
+    
+    const { url } = res.data;
+    window.location.href = url; // Redirect to Stripe
   };
 
   return (
@@ -26,7 +35,7 @@ const Payment = ({ setPaymentDone }) => {
             Upgrade to Pro
           </h1>
           <p className="text-gray-400 text-center mt-2">
-            Unlock <span className="text-purple-400 font-semibold">BrainMesh</span> and premium features for just
+            Unlock <span className="text-purple-400 font-semibold">Multi-LLM</span> and premium features for just
           </p>
         </div>
 
@@ -64,7 +73,7 @@ const Payment = ({ setPaymentDone }) => {
 
         {/* Cancel */}
         <button
-          onClick={() => navigate("/chat")}
+          onClick={() => navigate("/")}
           className="mt-4 w-full text-gray-400 hover:text-gray-200 text-sm"
         >
           Cancel & Go Back
@@ -75,3 +84,4 @@ const Payment = ({ setPaymentDone }) => {
 };
 
 export default Payment;
+

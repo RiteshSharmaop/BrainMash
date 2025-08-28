@@ -21,13 +21,13 @@ app.use(express.urlencoded({ extended: true }));
 
 import chatRoutes from "./routes/chat.routes.js";
 import userRoutes from "./routes/user.routes.js";
-
+import paymentRoutes from "./routes/payment.route.js";
 app.get('/', (req, res) => {
     res.send("Welcome to the Chat API");
 });
 app.use("/api/chat", chatRoutes);
 app.use("/api/user", userRoutes);
-
+app.use("/api/payment", paymentRoutes);
 
 
 export default app;

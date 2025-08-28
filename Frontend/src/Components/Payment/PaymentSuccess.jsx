@@ -1,9 +1,14 @@
 import React from "react";
 import { CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ParticleBackground from "../Layout/ParticleBackground";
 
-const PaymentSuccess = () => {
+const PaymentSuccess = ({setPaymentDone}) => {
+    const navigate = useNavigate();
+    const handleSucces = ()=>{
+      setPaymentDone(true);
+      navigate("/chat")
+    }
   return (
     <div className="h-screen flex items-center justify-center bg-gray-900 text-white relative overflow-hidden">
       <ParticleBackground />
@@ -16,12 +21,12 @@ const PaymentSuccess = () => {
         <p className="text-gray-300 mb-6">
           Thank you for subscribing! Your Multi-LLM Pro access is now active.
         </p>
-        <Link
-          to="/"
+        <button
+          onClick={handleSucces}
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-6 py-3 rounded-xl font-medium transition-all"
         >
-          Go to Dashboard
-        </Link>
+          Go to Chat
+        </button>
       </div>
     </div>
   );
