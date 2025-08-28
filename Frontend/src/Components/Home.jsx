@@ -107,10 +107,12 @@ const Home = ({paymentDone, setPaymentDone }) => {
   const handleSubmit = async (e) => {
   e.preventDefault();
   if (!input.trim()) return;
+  const prompt = input;
+  setInput("");
 
   const userMessage = { 
     type: "user", 
-    content: input, 
+    content: prompt, 
     time: new Date().toLocaleTimeString() 
   };
 
@@ -148,7 +150,7 @@ const Home = ({paymentDone, setPaymentDone }) => {
     const res = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}api/chat/`,
       { 
-        prompt: input, 
+        prompt: prompt, 
         selectedLLMs,
         isMultiLLM: showMultiLLMBox 
       }
@@ -192,7 +194,7 @@ const Home = ({paymentDone, setPaymentDone }) => {
     console.error("❌ Error in handleSubmit:", err);
   }
 
-  setInput("");
+  
 };
 
 

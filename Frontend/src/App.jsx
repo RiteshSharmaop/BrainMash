@@ -7,6 +7,8 @@ import UserProtectedWrapper from "./Pages/UserProtectedWrapper"
 import Loading from "./Components/Loading"
 import Payment from "./Components/Payment/Payment"
 import { useState } from "react"
+import PaymentSuccess from "./Components/Payment/PaymentSuccess"
+import PaymentCancel from "./Components/Payment/PaymentCancel"
 
 
 function App() {
@@ -28,6 +30,8 @@ function App() {
         path="/payment"
         element={<Payment setPaymentDone={setPaymentDone} />}
       />
+      <Route path="/payment/success" element={<PaymentSuccess />} />
+      <Route path="/payment/cancel" element={<PaymentCancel />} />
       </Routes>
       
     </>
