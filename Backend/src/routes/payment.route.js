@@ -3,7 +3,7 @@ import { authUser } from "../middleware/auth.middelware.js";
 import { payment } from "../controller/payment.controller.js";
 const router = Router();
 
-router.route("/create-checkout-session").post(payment);
+router.route("/create-checkout-session").post(authUser ,payment);
 
 
 export default router;
