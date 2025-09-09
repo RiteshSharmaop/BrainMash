@@ -5,6 +5,15 @@ import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { BlacklistToken } from "../models/blacklistToken.model.js";
 
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // true only in production (HTTPS)
+    sameSite: "strict",
+    path: "/", 
+    maxAge: 24 * 60 * 60 * 1000, // 1 day
+};
+
 const userRegister = asyncHandler(async (req, res) => {
     try {
         const { fullName, email, password, confirmPassword } = req.body;
@@ -67,12 +76,7 @@ const userRegister = asyncHandler(async (req, res) => {
         const token = user.generateAuthToken();
 
         // Set cookie
-        res.cookie("token", token, {
-            httpOnly: true, // cannot be accessed by JS
-            secure: process.env.NODE_ENV === "production", // only https in prod
-            sameSite: "strict",
-            maxAge: 24 * 60 * 60 * 1000, // 1 day
-        });
+        res.cookie("token", token, cookieOptions);
 
         res.status(201).json(
             new ApiResponse(
@@ -124,12 +128,7 @@ const userLogin = asyncHandler(async (req, res) => {
     const token = user.generateAuthToken();
 
     // Set cookie
-    res.cookie("token", token, {
-        httpOnly: true, // cannot be accessed by JS
-        secure: process.env.NODE_ENV === "production", // only https in prod
-        sameSite: "strict",
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-    });
+    res.cookie("token", token, cookieOptions);
     return res
         .status(201)
         .json(new ApiResponse(201, { token, user }, "User Login Successfully"));
@@ -156,7 +155,7 @@ const loggedOutUser = asyncHandler(async (req, res) => {
     await BlacklistToken.create({ token });
 
     // Clear cookie with same options used when setting it
-    res.clearCookie("token");
+    res.clearCookie("token", cookieOptions);
 
     return res
         .status(201)
