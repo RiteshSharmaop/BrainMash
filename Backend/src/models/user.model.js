@@ -22,6 +22,11 @@ const userSchema = new Schema(
             select: false,
             required: [true, "Password is required"],
         },
+        havePrimium: {
+            type: Boolean,
+            default: false,
+        },
+        
     },
     { timestamps: true }
 );
