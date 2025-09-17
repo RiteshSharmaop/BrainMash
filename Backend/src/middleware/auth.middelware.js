@@ -7,7 +7,9 @@ import { BlacklistToken } from "../models/blacklistToken.model.js";
 export const authUser = asyncHandler(async (req , res , next) => {
     try {
         const token = req.cookies?.token || req.headers?.authorization?.split(' ')[1];
+        // const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "")
 
+     
         if(!token){
             return next(new ApiError(401 , "Unauthorized Request"));
         }
@@ -17,6 +19,8 @@ export const authUser = asyncHandler(async (req , res , next) => {
             return next(new ApiError(401 , "Unauthorized Request: Blacklisted Token"));
         }
 
+
+
         const decodedToken = jwt.verify(token , process.env.JWT_SECRET);
         const user = await User.findById(decodedToken?._id);
     
@@ -25,6 +29,10 @@ export const authUser = asyncHandler(async (req , res , next) => {
         }
     
         req.user = user;
+        console.log("User from auth middleware:", user.email);
+
+
+        
         next();
     } catch (error) {
         console.log("error in auth.js middleware ", error.message);

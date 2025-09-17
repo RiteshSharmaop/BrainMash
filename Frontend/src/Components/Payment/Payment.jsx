@@ -14,7 +14,12 @@ const Payment = ({ setPaymentDone }) => {
 
   const handlePayment = async() => {
     const stripe = await stripePromise;
-    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/payment/create-checkout-session`);
+    console.log("Clicked on payment");
+    
+    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/payment/create-checkout-session`,
+      { plan: "multi-llm" }, 
+      {  withCredentials: true } // 🔑 send cookies
+    );
     
     const { url } = res.data;
     window.location.href = url; // Redirect to Stripe
@@ -41,15 +46,15 @@ const Payment = ({ setPaymentDone }) => {
 
         {/* Price Box */}
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-center shadow-lg mb-6">
-          <p className="text-4xl font-extrabold">₹500</p>
+          <p className="text-4xl font-extrabold">₹99</p>
           <p className="text-sm text-gray-200 mt-1">One-time subscription</p>
         </div>
 
         {/* Features */}
         <ul className="space-y-3 mb-6">
           {[
+            "Life Time Access",
             "Access Multi-LLM mode",
-            "Unlimited conversations",
             "Priority response speed",
             "Early access to new models"
           ].map((feature, i) => (
@@ -66,7 +71,7 @@ const Payment = ({ setPaymentDone }) => {
           className="w-full bg-gradient-to-r from-purple-600 to-blue-600 
                      hover:from-purple-700 hover:to-blue-700 
                      text-white font-semibold py-3 rounded-xl 
-                     transition-all shadow-md"
+                     transition-all shadow-md cursor-pointer"
         >
           Pay ₹500 & Upgrade
         </button>
@@ -74,7 +79,7 @@ const Payment = ({ setPaymentDone }) => {
         {/* Cancel */}
         <button
           onClick={() => navigate("/")}
-          className="mt-4 w-full text-gray-400 hover:text-gray-200 text-sm"
+          className="mt-4 w-full text-gray-400 hover:text-gray-200 text-sm cursor-pointer"
         >
           Cancel & Go Back
         </button>

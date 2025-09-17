@@ -1,11 +1,15 @@
 import { Payment } from "../models/payment.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { Stripe } from "stripe";
+import client from "../db/redis.js";
 
 const payment = asyncHandler(async (req, res) => {
+ 
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY); // use test key
-
+   
+    
     try {
+        
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"], // only "card"
             mode: "payment",
@@ -34,7 +38,7 @@ const payment = asyncHandler(async (req, res) => {
             cancel_url: "http://localhost:5173/cancel",
         });
 
-        console.log(session);
+        // await client.set(`payment:payment_${req.user}`, JSON.stringify(session));
 
         res.json({ id: session.id, url: session.url, payment });
     } catch (error) {
