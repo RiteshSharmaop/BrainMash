@@ -10,7 +10,7 @@ The project also integrates **Stripe** for secure payments and uses **MongoDB** 
 
 **Frontend**: ReactJS (in `/frontend`)  
 **Backend**: Node.js, Express.js (in `/backend`)  
-**Database**: MongoDB (Redis planned for caching)  
+**Database**: MongoDB + Redis
 **Payment Gateway**: Stripe API  
 **Authentication**: JWT + Cookies  
 

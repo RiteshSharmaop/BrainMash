@@ -103,7 +103,7 @@ const userLogin = asyncHandler(async (req, res) => {
     // generate access and refresh token and send to user by secure cookies
     // if correct authenticate user tu accesss things
     // return response
-    console.log("Login attempt:", req.body);
+
     const { email, password } = req.body;
     
     if (email == "" || password == "") {
@@ -129,6 +129,7 @@ const userLogin = asyncHandler(async (req, res) => {
 
     // Set cookie
     res.cookie("token", token, cookieOptions);
+    console.log("User Logged In");
     return res
         .status(201)
         .json(new ApiResponse(201, { token, user }, "User Login Successfully"));
@@ -156,7 +157,8 @@ const loggedOutUser = asyncHandler(async (req, res) => {
 
     // Clear cookie with same options used when setting it
     res.clearCookie("token", cookieOptions);
-
+    console.log("UUser Logged Out");
+    
     return res
         .status(201)
         .json(new ApiResponse(201, null, "User Logout Successfully"));
