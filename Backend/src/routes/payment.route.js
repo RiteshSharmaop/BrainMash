@@ -1,12 +1,11 @@
 import { Router } from "express";
 import { authUser } from "../middleware/auth.middelware.js";
-import { payment } from "../controller/payment.controller.js";
+import { payment , verifyPayment} from "../controller/payment.controller.js";
+
 const router = Router();
 
-console.log("Payment route loaded");
-
-router.route("/create-checkout-session").post(authUser, payment);
-
+router.post("/create-checkout-session", authUser, payment);
+router.get("/verify-payment", authUser, verifyPayment);
 
 
 export default router;

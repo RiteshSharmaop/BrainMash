@@ -73,7 +73,7 @@ const Payment = ({ setPaymentDone }) => {
                      text-white font-semibold py-3 rounded-xl 
                      transition-all shadow-md cursor-pointer"
         >
-          Pay ₹500 & Upgrade
+          Pay ₹99 & Upgrade
         </button>
 
         {/* Cancel */}

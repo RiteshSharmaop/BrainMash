@@ -1,6 +1,6 @@
 # Live link
-https://brainmash-1.onrender.com/
 
+https://brainmash-1.onrender.com/
 
 # todo
 
@@ -41,20 +41,19 @@ https://brainmash-1.onrender.com/
 - user wrapper for secure auth (user protected site and cookie register )✅
 - user log-out and cookit deletion and storing in db (blacklist schema)✅
 
-
-
-
 # multi llm functionality
+
 - backend controller and services✅
 - frontend ✅
 - improve prompt ❌
 
-
 # 💳 Payment Integration (Slice) - TODO ❌
+
 - frontend ✅
 - backend ✅
 - frontend and backend done✅
-- payment db ❌
+- payment db ✅
+- fix bug for pament when payment done then it show payment dun and unlock multi llm button
 
 ## 1. Account Setup✅
 
@@ -129,3 +128,11 @@ https://brainmash-1.onrender.com/
 ---
 
 ✔ Once all tasks are done → Payment system will be fully integrated with secure backend verification + transaction storage.
+
+## connect chat and message to db
+
+- show user chats only
+- user able to delete chats
+- get active chat messages
+
+## chat functionality

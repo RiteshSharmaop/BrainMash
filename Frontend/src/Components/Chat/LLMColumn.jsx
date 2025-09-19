@@ -1,7 +1,15 @@
 import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
-const LLMColumn = ({ name, model ,color, messages, isTyping, onClose, isVisible }) => {
+const LLMColumn = ({
+  name,
+  model,
+  color,
+  messages,
+  isTyping,
+  onClose,
+  isVisible,
+}) => {
   const icons = {
     ChatGPT: "🤖",
     Gemini: "💎",
@@ -40,9 +48,9 @@ const LLMColumn = ({ name, model ,color, messages, isTyping, onClose, isVisible 
 
       {/* Messages Area */}
       <div className="flex-1 p-4 overflow-y-auto space-y-3 ">
-        {messages.map((msg, idx) => (
+        {messages.map((msg) => (
           <div
-            key={idx}
+            key={msg.id || `${msg.time}-${msg.type}`}
             className={`p-3 rounded-lg ${
               msg.type === "user"
                 ? "bg-blue-600 text-white ml-6"

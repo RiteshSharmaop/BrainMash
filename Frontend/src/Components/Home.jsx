@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Lock, MessageCircle } from "lucide-react";
-import axios from "axios"
+import axios from "axios";
 import ParticleBackground from "./Layout/ParticleBackground";
 import LLMColumn from "./Chat/LLMColumn";
 import Sidebar from "./Layout/Sidebar";
+import { UserDataContext } from "../context/UserContext";
+import { useContext } from "react";
 
-const Home = ({paymentDone, setPaymentDone }) => {
+const Home = ({ paymentDone, setPaymentDone }) => {
   const [visibleLLMs, setVisibleLLMs] = useState({
     ChatGPT: true,
     Gemini: true,
@@ -19,77 +21,119 @@ const Home = ({paymentDone, setPaymentDone }) => {
     Gemini: [],
     DeepSeek: [],
     Perplexity: [],
-    Lama: []
+    Lama: [],
   });
   const [chatMessages, setChatMessages] = useState({
-    1: { ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] },
-    2: { ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] },
+    "initial-1": {
+      ChatGPT: [],
+      Gemini: [],
+      DeepSeek: [],
+      Perplexity: [],
+      Lama: [],
+    },
+    "initial-2": {
+      ChatGPT: [],
+      Gemini: [],
+      DeepSeek: [],
+      Perplexity: [],
+      Lama: [],
+    },
   });
 
-
   const [isTyping, setIsTyping] = useState({
-    ChatGPT: false,
-    Gemini: false,
-    DeepSeek: false,
-    Perplexity: false,
-    Lama: false
+    "initial-1": {
+      ChatGPT: false,
+      Gemini: false,
+      DeepSeek: false,
+      Perplexity: false,
+      Lama: false,
+    },
+    "initial-2": {
+      ChatGPT: false,
+      Gemini: false,
+      DeepSeek: false,
+      Perplexity: false,
+      Lama: false,
+    },
   });
 
   const llmConfigs = [
-    { name: 'ChatGPT', color: 'bg-green-600' , model:"openai/gpt-4o-mini"},
-    { name: 'Gemini', color: 'bg-blue-600',  model:"google/gemini-2.5-flash"  },
-    { name: 'DeepSeek', color: 'bg-purple-600' , model:"deepseek/deepseek-chat-v3.1" },
-    { name: 'Perplexity', color: 'bg-orange-600',  model:"perplexity/sonar-pro"},
-    { name: 'Lama', color: 'bg-cyan-600' ,  model:"meta-llama/llama-4-maverick" }
+    { name: "ChatGPT", color: "bg-green-600", model: "openai/gpt-4o-mini" },
+    { name: "Gemini", color: "bg-blue-600", model: "google/gemini-2.5-flash" },
+    {
+      name: "DeepSeek",
+      color: "bg-purple-600",
+      model: "deepseek/deepseek-chat-v3.1",
+    },
+    {
+      name: "Perplexity",
+      color: "bg-orange-600",
+      model: "perplexity/sonar-pro",
+    },
+    {
+      name: "Lama",
+      color: "bg-cyan-600",
+      model: "meta-llama/llama-4-maverick",
+    },
   ];
 
   const [input, setInput] = useState("");
   const [sidebarWidth, setSidebarWidth] = useState(320);
   const [isResizing, setIsResizing] = useState(false);
   // state for Multi-LLM messages + typing
-  
-  
+
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showMultiLLMBox, setShowMultiLLMBox] = useState(false);
+
   const [chats, setChats] = useState([
-    { id: 1, title: "Chat 1", subtitle: "New Conversation" },
-    { id: 2, title: "Chat 2", subtitle: "New Conversation" },
+    // { id: "initial-1", title: "Chat 1", subtitle: "New Conversation" },
+    // { id: "initial-2", title: "Chat 2", subtitle: "New Conversation" },
   ]);
-  const [activeChat, setActiveChat] = useState(1);
+  const [activeChat, setActiveChat] = useState("initial-1");
   const [multiLLMMessages, setMultiLLMMessages] = useState([]);
   const [multiLLMTyping, setMultiLLMTyping] = useState(false);
 
-
   const handleCloseLLM = (llmName) => {
-    setVisibleLLMs(prev => ({ ...prev, [llmName]: false }));
+    setVisibleLLMs((prev) => ({ ...prev, [llmName]: false }));
   };
 
   const handleRestoreLLM = (llmName) => {
-    setVisibleLLMs(prev => ({ ...prev, [llmName]: true }));
+    setVisibleLLMs((prev) => ({ ...prev, [llmName]: true }));
   };
 
-  const getVisibleLLMs = () => llmConfigs.filter(llm => visibleLLMs[llm.name]);
-  const getClosedLLMs = () => llmConfigs.filter(llm => !visibleLLMs[llm.name]);
+  const getVisibleLLMs = () =>
+    llmConfigs.filter((llm) => visibleLLMs[llm.name]);
+  const getClosedLLMs = () =>
+    llmConfigs.filter((llm) => !visibleLLMs[llm.name]);
 
-  const handleMouseDown = (e) => { setIsResizing(true); e.preventDefault(); };
-  const handleMouseMove = (e) => { if(!isResizing) return; const newWidth = Math.min(Math.max(200, e.clientX), 500); setSidebarWidth(newWidth); };
+  const handleMouseDown = (e) => {
+    setIsResizing(true);
+    e.preventDefault();
+  };
+  const handleMouseMove = (e) => {
+    if (!isResizing) return;
+    const newWidth = Math.min(Math.max(200, e.clientX), 500);
+    setSidebarWidth(newWidth);
+  };
   const handleMouseUp = () => setIsResizing(false);
+
+  const { user } = useContext(UserDataContext);
 
   useEffect(() => {
     if (isResizing) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "col-resize";
     } else {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'default';
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "default";
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'default';
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "default";
     };
   }, [isResizing]);
 
@@ -99,129 +143,364 @@ const Home = ({paymentDone, setPaymentDone }) => {
       Gemini: `Gemini's analysis of: "${query}". Detailed insights.`,
       DeepSeek: `DeepSeek's deep analysis: "${query}". Technical details.`,
       Perplexity: `Perplexity's research on: "${query}". Relevant findings.`,
-      Lama: `Lama's insights: "${query}". Scalable solutions.`
+      Lama: `Lama's insights: "${query}". Scalable solutions.`,
     };
     return responses[llmName] || `Response from ${llmName}`;
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!input.trim()) return;
-  const prompt = input;
-  setInput("");
+    e.preventDefault();
+    if (!input.trim()) return;
+    const prompt = input;
+    setInput("");
+    
+    
+    const userMessage = {
+      id: Date.now() + "-user",
+      type: "user",
+      content: prompt,
+      time: new Date().toLocaleTimeString(),
+    };
 
-  const userMessage = { 
-    type: "user", 
-    content: prompt, 
-    time: new Date().toLocaleTimeString() 
+    // ✅ Add user message to all visible LLMs in current chat
+    setChatMessages((prev) => ({
+      ...prev,
+      [activeChat]: Object.fromEntries(
+        Object.entries(prev[activeChat]).map(([llm, msgs]) => [
+          llm,
+          [...msgs, userMessage],
+        ])
+      ),
+    }));
+
+    // ✅ Also add to Multi-LLM (if open)
+    if (showMultiLLMBox) {
+      setMultiLLMMessages((prev) => [...prev, userMessage]);
+      setMultiLLMTyping(true);
+    }
+
+    // ✅ Set typing indicators for active chat only
+    setIsTyping((prev) => ({
+      ...prev,
+      [activeChat]: Object.fromEntries(
+        Object.entries(visibleLLMs).map(([llm, isVisible]) => [llm, isVisible])
+      ),
+    }));
+
+    try {
+      const selectedLLMs = llmConfigs
+        .filter((llm) => visibleLLMs[llm.name])
+        .map((llm) => llm.model);
+
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}api/chat/${activeChat}/messages`,
+        {
+          prompt: prompt,
+          selectedLLMs: selectedLLMs,
+          isMultiLLM: showMultiLLMBox,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = res.data;
+      // console.log("AAGYA");
+      
+
+      console.log("Backend return Data : ", res);
+
+      if (data.success) {
+        const results = data.data.results;
+
+        // --- Normal LLM responses ---
+        llmConfigs.forEach((llm) => {
+          if (!visibleLLMs[llm.name]) return;
+          const aiMessage = {
+            id: Date.now() + "-" + llm.name,
+            type: "ai",
+            content: results[llm.model] || "⚠️ No response",
+            time: new Date().toLocaleTimeString(),
+          };
+          setChatMessages((prev) => ({
+            ...prev,
+            [activeChat]: {
+              ...prev[activeChat],
+              [llm.name]: [...prev[activeChat][llm.name], aiMessage],
+            },
+          }));
+          setIsTyping((prev) => ({
+            ...prev,
+            [activeChat]: {
+              ...prev[activeChat],
+              [llm.name]: false,
+            },
+          }));
+        });
+
+        // --- Multi-LLM response ---
+        if (showMultiLLMBox && data.data.multiLLMResponse) {
+          const aiMessage = {
+            id: Date.now() + "-multi",
+            type: "ai",
+            content: data.data.multiLLMResponse,
+            time: new Date().toLocaleTimeString(),
+          };
+          setMultiLLMMessages((prev) => [...prev, aiMessage]);
+          setMultiLLMTyping(false);
+        }
+      }
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 401) {
+          alert("Inshufficient Creds❌❌❌")
+        }
+      }
+      console.error("❌ Error in handleSubmit:", err);
+    }
   };
 
-  // ✅ Add user message to all visible LLMs in current chat
-  setChatMessages(prev => ({
-    ...prev,
-    [activeChat]: Object.fromEntries(
-      Object.entries(prev[activeChat]).map(([llm, msgs]) => [
-        llm,
-        [...msgs, userMessage],
-      ])
-    ),
-  }));
+  async function createChat() {
+    try {
+      const token = localStorage.getItem("token");
+      const createChatResponse = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}api/chat/`,
+        {
+          title: `New Chat`, // We'll update this after getting the response
+          subtitle: "New Conversation",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  // ✅ Also add to Multi-LLM (if open)
-  if (showMultiLLMBox) {
-    setMultiLLMMessages(prev => [...prev, userMessage]);
-    setMultiLLMTyping(true);
+      if (!createChatResponse.data.success) {
+        console.error("Failed to create chat:", createChatResponse.data.error);
+        return;
+      }
+
+      console.log("Created new chat:", createChatResponse.data);
+
+      const data = createChatResponse.data.chat;
+      // Create new chat object using MongoDB _id
+      const newChat = {
+        id: data._id,
+        title: `Chat ${chats.length + 1}`, // Set the title based on current chat count
+        subtitle: data.subtitle,
+      };
+
+      // Update the chat title in the backend
+      // await axios.put(
+      //   `${import.meta.env.VITE_BACKEND_URL}api/chat/${data._id}`,
+      //   { title: newChat.title },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //   }
+      // );
+
+      // Update local state
+      setChats((prevChats) => {
+        if (prevChats.some((c) => c.id === newChat.id)) return prevChats;
+        return [...prevChats, newChat];
+      });
+
+      // Initialize messages for this new chat
+      setChatMessages((prev) => ({
+        ...prev,
+        [newChat.id]: {
+          ChatGPT: [],
+          Gemini: [],
+          DeepSeek: [],
+          Perplexity: [],
+          Lama: [],
+        },
+      }));
+
+      // Initialize typing state for the new chat
+      setIsTyping((prev) => ({
+        ...prev,
+        [newChat.id]: {
+          ChatGPT: false,
+          Gemini: false,
+          DeepSeek: false,
+          Perplexity: false,
+          Lama: false,
+        },
+      }));
+
+      // Set as active chat
+      setActiveChat(newChat.id);
+
+      return newChat;
+    } catch (error) {
+      console.error("Error creating new chat:", error);
+      throw error;
+    }
   }
 
-  // ✅ Set typing indicators
-  setIsTyping(prev => {
-    const updated = {};
-    Object.keys(prev).forEach(llm => {
-      updated[llm] = visibleLLMs[llm];
-    });
-    return updated;
-  });
+  // get from db and push in chat
+  async function getChats() {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}api/chat/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  try {
-    const selectedLLMs = llmConfigs
-      .filter(llm => visibleLLMs[llm.name])
-      .map(llm => llm.model);
+      if (response.data.success && Array.isArray(response.data.chats)) {
+        const loadedChats = response.data.chats.map((chat) => ({
+          id: chat._id,
+          title: chat.title || `Chat ${chats.length + 1}`,
+          subtitle: chat.subtitle,
+        }));
 
-    const res = await axios.post(
+        // Set chats
+        setChats(loadedChats);
+
+        // Initialize message states for each chat
+        const messageStates = {};
+        const typingStates = {};
+        loadedChats.forEach((chat) => {
+          messageStates[chat.id] = {
+            ChatGPT: [],
+            Gemini: [],
+            DeepSeek: [],
+            Perplexity: [],
+            Lama: [],
+          };
+          typingStates[chat.id] = {
+            ChatGPT: false,
+            Gemini: false,
+            DeepSeek: false,
+            Perplexity: false,
+            Lama: false,
+          };
+        });
+
+        setChatMessages(messageStates);
+        setIsTyping(typingStates);
+
+        // Set active chat to the first chat if available
+        if (loadedChats.length > 0) {
+          setActiveChat(loadedChats[0].id);
+        } else {
+          // If no chats exist, create a new one
+          await createChat();
+        }
+      }
+      console.log("Loaded chats:", response.data);
+    } catch (error) {
+      console.error("Error loading chats:", error);
+      // If there's an error loading chats, create a new one
+      createChat();
+    }
+  }
+
+  useEffect(() => {
+    // Only fetch existing chats
+    getChats();
+  }, []);
+
+  const handleNewChat = async () => {
+    const createChat = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}api/chat/`,
-      { 
-        prompt: prompt, 
-        selectedLLMs,
-        isMultiLLM: showMultiLLMBox 
+      {
+        title: `Chat ${chats.length + 1} `,
+        // subtitle: "New Conversation",
+        subtitle: "Creating test",
+      },
+      {
+        withCredentials: true,
       }
     );
 
-    const data = res.data;
+    const data = createChat.data.chat;
+    // Example new chat object
+    const newChat = {
+      id: data._id,
+      title: data.title,
+      subtitle: data.subtitle,
+    };
 
-    if (data.success) {
-      const results = data.data.results;
+    // Push into chats
 
-      // --- Normal LLM responses ---
-      llmConfigs.forEach(llm => {
-        if (!visibleLLMs[llm.name]) return;
-        const aiMessage = { 
-          type: "ai", 
-          content: results[llm.model] || "⚠️ No response", 
-          time: new Date().toLocaleTimeString() 
-        };
-        setChatMessages(prev => ({
-          ...prev,
-          [activeChat]: {
-            ...prev[activeChat],
-            [llm.name]: [...prev[activeChat][llm.name], aiMessage],
-          },
-        }));
-        setIsTyping(prev => ({ ...prev, [llm.name]: false }));
-      });
-
-      // --- Multi-LLM response ---
-      if (showMultiLLMBox && data.data.multiLLMResponse) {
-        const aiMessage = {
-          type: "ai",
-          content: data.data.multiLLMResponse,
-          time: new Date().toLocaleTimeString(),
-        };
-        setMultiLLMMessages(prev => [...prev, aiMessage]);
-        setMultiLLMTyping(false);
-      }
-    }
-  } catch (err) {
-    console.error("❌ Error in handleSubmit:", err);
-  }
-
-  
-};
-
-
-  const handleNewChat = () => {
-    const newId = Date.now();
-    const newChat = { id: newId, title: `Chat ${chats.length + 1}`, subtitle: 'New Conversation' };
-    
-    setChats([...chats, newChat]);
-    setActiveChat(newId);
+    setChats((prevChats) => {
+      if (prevChats.some((c) => c.id === newChat.id)) return prevChats;
+      return [...prevChats, newChat];
+    });
 
     // Initialize messages for this new chat
-    setChatMessages(prev => ({
+    // Initialize messages and typing state for this new chat
+    setChatMessages((prev) => ({
       ...prev,
-      [newId]: { ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] }
+      [newChat.id]: {
+        ChatGPT: [],
+        Gemini: [],
+        DeepSeek: [],
+        Perplexity: [],
+        Lama: [],
+      },
     }));
-  };
+    // Initialize typing state for the new chat
+    setIsTyping((prev) => ({
+      ...prev,
+      [newChat.id]: {
+        ChatGPT: false,
+        Gemini: false,
+        DeepSeek: false,
+        Perplexity: false,
+        Lama: false,
+      },
+    }));
 
+    setActiveChat(newChat.id);
+  };
 
   const handleDeleteChat = (chatId) => {
     if (chats.length <= 1) return;
-    const updatedChats = chats.filter(chat => chat.id !== chatId);
+    const updatedChats = chats.filter((chat) => chat.id !== chatId);
     setChats(updatedChats);
     if (activeChat === chatId) {
       setActiveChat(updatedChats[0].id);
-      setMessages({ ChatGPT: [], Gemini: [], DeepSeek: [], Perplexity: [], Lama: [] });
+      setMessages({
+        ChatGPT: [],
+        Gemini: [],
+        DeepSeek: [],
+        Perplexity: [],
+        Lama: [],
+      });
     }
   };
+
+  useEffect(() => {
+    const checkPayment = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}api/payment/verify-payment`,
+          { withCredentials: true } // 🔑 send cookies
+        );
+
+        if (res.status === 200) {
+          setPaymentDone(true);
+        }
+        // if(res.dat){
+        // }
+        // Update your context or state here, e.g. markAsPaid(res.data.isPaid)
+      } catch (err) {}
+    };
+
+    checkPayment();
+  }, [paymentDone, setPaymentDone]); // runs whenever paymentDone changes
 
   return (
     <div className="h-screen flex bg-gray-900 text-white relative overflow-hidden">
@@ -242,85 +521,59 @@ const Home = ({paymentDone, setPaymentDone }) => {
         handleRestoreLLM={handleRestoreLLM}
         paymentDone={paymentDone}
         setPaymentDone={setPaymentDone}
-        
       />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full relative z-10">
-        
-
-
-
-
         {/* LLM Columns */}
-        {/* <div
+        <div
           className="flex-1 grid gap-4 p-6 overflow-hidden"
-          style={{ gridTemplateColumns: `repeat(${getVisibleLLMs().length}, 1fr)` }}
+          style={{
+            gridTemplateColumns: `repeat(${
+              getVisibleLLMs().length + (showMultiLLMBox ? 1 : 0)
+            }, 1fr)`,
+          }}
         >
+          {/* Multi-LLM column appears first if enabled */}
+          {showMultiLLMBox && (
+            <LLMColumn
+              key="Multi-LLM"
+              name="Multi-LLM"
+              model="multi-llm"
+              color="bg-pink-600"
+              messages={multiLLMMessages}
+              isTyping={multiLLMTyping}
+              onClose={() => setShowMultiLLMBox(false)}
+              isVisible={true}
+            />
+          )}
+
+          {/* Other LLMs */}
           {getVisibleLLMs().map((llm) => (
             <LLMColumn
               key={llm.name}
               name={llm.name}
               model={llm.model}
               color={llm.color}
-              // messages={messages[llm.name]}
               messages={chatMessages[activeChat]?.[llm.name] || []}
-              isTyping={isTyping[llm.name]}
+              isTyping={isTyping[activeChat]?.[llm.name]}
               onClose={handleCloseLLM}
               isVisible={visibleLLMs[llm.name]}
             />
           ))}
-        </div> */}
-        
-        {/* LLM Columns */}
-  <div
-    className="flex-1 grid gap-4 p-6 overflow-hidden"
-    style={{ gridTemplateColumns: `repeat(${getVisibleLLMs().length + (showMultiLLMBox ? 1 : 0)}, 1fr)` }}
-  >
-    {/* Multi-LLM column appears first if enabled */}
-    {showMultiLLMBox && (
-      <LLMColumn
-        key="Multi-LLM"
-        name="Multi-LLM"
-        model="multi-llm"
-        color="bg-pink-600"
-        messages={multiLLMMessages}
-        isTyping={multiLLMTyping}
-        onClose={() => setShowMultiLLMBox(false)}
-        isVisible={true}
-      />
-    )}
+        </div>
 
-    {/* Other LLMs */}
-    {getVisibleLLMs().map((llm) => (
-      <LLMColumn
-        key={llm.name}
-        name={llm.name}
-        model={llm.model}
-        color={llm.color}
-        messages={chatMessages[activeChat]?.[llm.name] || []}
-        isTyping={isTyping[llm.name]}
-        onClose={handleCloseLLM}
-        isVisible={visibleLLMs[llm.name]}
-      />
-    ))}
-  </div>
-          
-
-        
         {/* Input Area */}
         <div className="p-6 border-t border-gray-700/50 bg-gray-800/30 backdrop-blur-md">
           <div className="flex gap-4">
             {/* Multi-LLM Button */}
-            
-           
+
             <button
-              onClick={() => paymentDone && setShowMultiLLMBox(prev => !prev)}
+              onClick={() => paymentDone && setShowMultiLLMBox((prev) => !prev)}
               disabled={!paymentDone}
               className="relative bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium transition-all flex items-center gap-2 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Multi-LLM
-
               {/* Overlay */}
               {!paymentDone && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-xl">
@@ -328,8 +581,6 @@ const Home = ({paymentDone, setPaymentDone }) => {
                 </div>
               )}
             </button>
-
-
 
             <input
               type="text"
@@ -349,9 +600,6 @@ const Home = ({paymentDone, setPaymentDone }) => {
             </button>
           </div>
         </div>
-
-
-        
       </div>
     </div>
   );

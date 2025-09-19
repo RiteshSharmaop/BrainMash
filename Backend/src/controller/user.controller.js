@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { BlacklistToken } from "../models/blacklistToken.model.js";
+import redisClient from "../db/redis.js";
 
 
 const cookieOptions = {
@@ -16,6 +17,8 @@ const cookieOptions = {
 
 const userRegister = asyncHandler(async (req, res) => {
     try {
+       
+
         const { fullName, email, password, confirmPassword } = req.body;
         if (!fullName || !email || !password || !confirmPassword) {
             return res
@@ -75,6 +78,11 @@ const userRegister = asyncHandler(async (req, res) => {
 
         const token = user.generateAuthToken();
 
+
+        // Store token in Redis with an expiration time
+        await redisClient.set(`User:${token}`, JSON.stringify(user), { EX: 24 * 60 * 60 }); // 1 day expiration
+
+
         // Set cookie
         res.cookie("token", token, cookieOptions);
 
@@ -104,6 +112,16 @@ const userLogin = asyncHandler(async (req, res) => {
     // if correct authenticate user tu accesss things
     // return response
 
+
+
+    const cacheToken = req.cookies?.token || req.headers?.authorization?.split(" ")[1];
+    const redisCachedToken = await redisClient.get(`User:${cacheToken}`);
+    if (redisCachedToken) {
+        return res
+            .status(201)
+            .json(new ApiResponse(201, null, "User already logged in"));
+    }
+
     const { email, password } = req.body;
     
     if (email == "" || password == "") {
@@ -121,11 +139,13 @@ const userLogin = asyncHandler(async (req, res) => {
         throw new ApiError(404, "User not found");
     }
 
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
         throw new ApiError(400, "Invalid Password");
     }
     const token = user.generateAuthToken();
+    await redisClient.set(`User:${token}`, JSON.stringify(user), { EX: 24 * 60 * 60 }); // 1 day expiration
 
     // Set cookie
     res.cookie("token", token, cookieOptions);
@@ -155,10 +175,14 @@ const loggedOutUser = asyncHandler(async (req, res) => {
     // Add to blacklist
     await BlacklistToken.create({ token });
 
+
+    // Remove from Redis
+    await redisClient.del(`User:${token}`);
+
     // Clear cookie with same options used when setting it
     res.clearCookie("token", cookieOptions);
-    console.log("UUser Logged Out");
-    
+    console.log("User Logged Out");
+
     return res
         .status(201)
         .json(new ApiResponse(201, null, "User Logout Successfully"));

@@ -10,7 +10,7 @@ import {
   Chrome,
 } from "lucide-react";
 import { LOGO_URL, NAME } from "../constants";
-import axios from 'axios';
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { UserDataContext } from "../context/UserContext";
 
@@ -75,13 +75,12 @@ const LoginPage = () => {
     password: "testtest",
   });
   const handleLogin = async (e) => {
-    e.preventDefault();
-    
+    if (e) e.preventDefault();
 
-    const {email , password} = loginData;
+    const { email, password } = loginData;
 
     if (!email.trim() || !password.trim()) {
-      alert('Passwords do not match!');
+      alert("Please enter both email and password");
       return;
     }
 
@@ -89,45 +88,64 @@ const LoginPage = () => {
       setIsLoading(true);
 
       const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}api/user/login`, // adjust URL as needed
+        `${import.meta.env.VITE_BACKEND_URL}api/user/login`,
         { email, password },
-        { withCredentials: true } // ensures cookies are sent/received
+        { withCredentials: true } // This is needed for cookies
+
+        // ensures cookies are sent/received
       );
+      console.log(res);
 
-      if (res.status === 201) {
-        const data = res.data.data;
-        setToken(data.token);   // stores in state + localStorage
-        setUser({ email: data.email, fullName: data.fullName });
-        localStorage.setItem("token", data.token);
+      if (res.data.success || res.status === 201 || res.status === 200) {
+        // Extract user and token from the response
+        const { token, user } = res.data.data;
+
+        // Update context
+        setToken(token);
+        setUser({
+          email: user.email,
+          fullName: user.fullName,
+        });
+
+        // Store token in localStorage
+        localStorage.setItem("token", token);
+
+        console.log("Login successful:", { token, user });
+
+        // Navigate to chat
         navigate("/chat");
+      } else {
+        alert(res.data.message || "Login failed");
       }
-
-     
     } catch (err) {
+      console.error("Login error:", err);
+
       if (err.response) {
         if (err.response.status === 404) {
-          // specific: user exists
-          alert("User with this email not exists ❌");
-        }else if(err.response.status === 400) {
-          alert("write correct email or password ❌");
-          
+          alert("User not found. Please check your email ❌");
+        } else if (err.response.status === 400) {
+          alert("Invalid email or password ❌");
+        } else if (err.response.status === 401) {
+          alert("Invalid credentials ❌");
         } else {
-          // other backend errors
-          alert(err.response.data.message || "Something went wrong ❌");
+          // Get error message from the API response if available
+          const errorMessage = err.response.data?.message || "Login failed";
+          alert(`${errorMessage} ❌`);
         }
+      } else if (err.request) {
+        // Network error
+        alert("Network error. Please check your internet connection ❌");
       } else {
-        // network or unknown error
-        alert("Network error. Try again later ❌");
+        alert("Something went wrong. Please try again ❌");
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  
-  const handleKeyPress = (e) => {
+  const handleKeyPress = async (e) => {
     if (e.key === "Enter" && loginData.email && loginData.password) {
-      handleLogin();
+      await handleLogin(e);
     }
   };
 
@@ -280,9 +298,12 @@ const LoginPage = () => {
           {/* Sign Up Link */}
           <div className="mt-6 text-center text-sm">
             <span className="text-gray-400">Don't have an account? </span>
-            <button onClick={()=>{
-              navigate('/register')
-            }} className="text-purple-400 hover:text-purple-300 font-medium">
+            <button
+              onClick={() => {
+                navigate("/register");
+              }}
+              className="text-purple-400 hover:text-purple-300 font-medium"
+            >
               Sign up
             </button>
           </div>

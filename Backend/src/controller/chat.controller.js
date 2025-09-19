@@ -1,0 +1,55 @@
+import { Chat } from "../models/chats.model.js";
+import { Message } from "../models/message.model.js";
+
+
+const createChat = async (req, res) => {
+  try {
+    const { title, subtitle } = req.body;
+    const userId = req.user._id; // Assuming auth middleware sets req.user
+    const chat = new Chat({ title, subtitle, userId });
+    await chat.save();
+    res.json({ success: true, chat });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+
+const getAllchats = async (req, res) => {
+  try {
+    const chats = await Chat.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    res.json({ success: true, chats });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+
+const getMessagesForChat = async (req, res) => {
+  try {
+    const { chatId } = req.params;
+    const messages = await Message.find({ chatId: req.params.chatId }).sort({ time: 1 });
+    res.json({ success: true, messages });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+
+
+const deleteChat =  async (req, res) => {
+  try {
+    await Chat.findByIdAndDelete(req.params.id);
+    await Message.deleteMany({ chatId: req.params.id });
+    res.json({ success: true, message: "Chat deleted" });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+export {
+    createChat,
+    getAllchats,
+    getMessagesForChat,
+    deleteChat
+};

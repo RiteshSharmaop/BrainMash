@@ -16,14 +16,18 @@ connectDB();
 import redisClient from "./db/redis.js";
 const client = redisClient;
 
-// Set a key with expiration of 10 seconds
+// // Set a key with expiration of 10 seconds
 await client.set("mykey", "Hello Redisssss!", {
   EX: 10  // expires in 10 seconds
 });
+const get = await client.get("mykey")
+console.log(get); // 'Hello Redisssss!'
 
-// Get the value
-const value = await client.get("mykey");
-console.log("Output from Redis:", value);
+
+
+
+
+
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
@@ -37,12 +41,18 @@ app.use(express.urlencoded({ extended: true }));
 import chatRoutes from "./routes/chat.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import paymentRoutes from "./routes/payment.route.js";
+import messageRoutes from "./routes/message.routes.js";
+
+
 app.get('/', (req, res) => {
     res.send("Welcome to the Chat API");
 });
 app.use("/api/chat", chatRoutes);
+
 app.use("/api/user", userRoutes);
 app.use("/api/payment", paymentRoutes);
+
+app.use("/api/message", messageRoutes);
 
 
 export default app;

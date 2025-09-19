@@ -1,28 +1,32 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 
-const paymentSchema = new Schema(
-    {
-        userId: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-        amount: {
-            type: Number,
-            required: true,
-        },
-        currency: {
-            type: String,
-            required: true,
-        },
-        status: {
-            type: String,
-            enum: ["pending", "completed", "failed"],
-            default: "pending",
-        },
+const paymentSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",   // link to your User model
+      required: true,
     },
-    { timestamps: true }
+    stripeSessionId: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    userName: {
+      type: String,
+      required: true,
+    },
+    userEmail: {
+      type: String,
+      required: true,
+    },
+    
+    amount: {
+      type: Number, // store in smallest unit (paise if INR)
+      required: true,
+    },
+  },
+  { timestamps: true }
 );
 
-
-export const Payment = new mongoose.model("Payment", paymentSchema);
+export const Payment = mongoose.model("Payment", paymentSchema);

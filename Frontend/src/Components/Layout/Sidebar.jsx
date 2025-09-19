@@ -44,7 +44,7 @@ const Sidebar = ({
         <>
           {/* Header */}
           <div className="p-6 border-b border-gray-700/50">
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
                 {/* <Sparkles size={18} className="text-white" /> */}
                 <iframe
@@ -63,8 +63,9 @@ const Sidebar = ({
             </div>
 
             {/* Upgrade Plan */}
-            <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-2">
+            {!paymentDone && (
+            <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-lg p-4 mt-6">
+              <div className="flex items-center gap-2  mb-2">
                 <Crown size={16} className="text-yellow-400" />
                 <span className="font-semibold text-sm">Upgrade to Pro</span>
               </div>
@@ -83,6 +84,7 @@ const Sidebar = ({
                 Upgrade Now
               </Link>
             </div>
+            )}
           </div>
 
           {/* Chat History */}

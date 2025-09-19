@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Eye, EyeOff, MessageCircle, User, Mail, Lock, ArrowRight, Github, Chrome, CloudCog } from 'lucide-react';
 import { LOGO_URL, NAME } from '../constants';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { UserDataContext } from '../context/UserContext';
 
 
 
@@ -63,6 +64,7 @@ const SignupPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
   const navigate = useNavigate();
+  const { setUser, setToken } = useContext(UserDataContext);
   const [signupData, setSignupData] = useState({
     fullName: '',
     email: '',
@@ -82,7 +84,7 @@ const SignupPage = () => {
     }
     setIsLoading(true);
     try {
-      const response = await axios.post(
+      const res = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}api/user/register`,
         {
           fullName: signupData.fullName,
@@ -94,14 +96,21 @@ const SignupPage = () => {
       );
 
       // success
-      const data = response.data.data;
+      console.log(res.data);
+      
+      
+      const data = res.data.data;
+      setToken(data.token);   // stores in state + localStorage
+      setUser({ email: data.email, fullName: data.fullName });
       localStorage.setItem("token", data.token);
       navigate("/chat");
+      
+      
 
       
     } catch (err) {
       if (err.response) {
-        if (err.response.status === 409) {
+        if (err.response.statusCode === 409) {
           // specific: user exists
           alert("User with this email already exists ❌");
         } else if (err.response.status === 400) {
