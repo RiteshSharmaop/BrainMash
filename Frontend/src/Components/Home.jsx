@@ -93,6 +93,15 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   const [multiLLMMessages, setMultiLLMMessages] = useState([]);
   const [multiLLMTyping, setMultiLLMTyping] = useState(false);
 
+  // Map backend model IDs to frontend display names
+  const modelToNameMap = {
+    "openai/gpt-4o-mini": "ChatGPT",
+    "google/gemini-2.5-flash": "Gemini",
+    "deepseek/deepseek-chat-v3.1": "DeepSeek",
+    "perplexity/sonar-pro": "Perplexity",
+    "meta-llama/llama-4-maverick": "Lama",
+  };
+
   const handleCloseLLM = (llmName) => {
     setVisibleLLMs((prev) => ({ ...prev, [llmName]: false }));
   };
@@ -148,13 +157,129 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     return responses[llmName] || `Response from ${llmName}`;
   };
 
+  useEffect(() => {
+    async function getChatMesssages() {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}api/chat/${activeChat}/messages`,
+        {
+          withCredentials: true,
+        }
+      );
+      console.log("Messages from server:", res.data);
+
+      if (res.data.success) {
+        const messages = res.data.messages;
+
+        // Reset messages for current chat
+        setChatMessages((prev) => ({
+          ...prev,
+          [activeChat]: {
+            ChatGPT: [],
+            Gemini: [],
+            DeepSeek: [],
+            Perplexity: [],
+            Lama: [],
+          },
+        }));
+
+        // Process each message
+        messages.forEach((msg) => {
+          if (msg.type === "user") {
+            // Create user message object
+            const userMessage = {
+              id: msg._id,
+              type: "user",
+              content: msg.content,
+              time: new Date(msg.createdAt).toLocaleTimeString(),
+            };
+
+            // Add user message to all LLM columns
+            Object.keys(visibleLLMs).forEach((llmName) => {
+              if (visibleLLMs[llmName]) {
+                setChatMessages((prev) => ({
+                  ...prev,
+                  [activeChat]: {
+                    ...prev[activeChat],
+                    [llmName]: [...prev[activeChat][llmName], userMessage],
+                  },
+                }));
+              }
+            });
+          } else if (msg.type === "ai") {
+            const aiMessage = {
+              id: msg._id,
+              type: "ai",
+              content: msg.content,
+              time: new Date(msg.createdAt).toLocaleTimeString(),
+            };
+
+            // Map the backend model to frontend display name
+            const modelName = modelToNameMap[msg.model];
+
+            if (modelName && visibleLLMs[modelName]) {
+              setChatMessages((prev) => ({
+                ...prev,
+                [activeChat]: {
+                  ...prev[activeChat],
+                  [modelName]: [
+                    ...(prev[activeChat][modelName] || []),
+                    aiMessage,
+                  ],
+                },
+              }));
+            } else {
+              console.warn("⚠️ Unknown or hidden model:", msg.model);
+            }
+          }
+        });
+
+        // Update Multi-LLM messages if box is open
+        if (showMultiLLMBox) {
+          setMultiLLMMessages([]); // Reset messages
+
+          // Create an array to hold all messages in order
+          const allMultiLLMMessages = [];
+
+          // Add all user messages first
+          messages.forEach((msg) => {
+            if (msg.type === "user") {
+              allMultiLLMMessages.push({
+                id: msg._id,
+                type: "user",
+                content: msg.content,
+                time: new Date(msg.createdAt).toLocaleTimeString(),
+              });
+            }
+          });
+
+          // Add AI messages that are multi-LLM responses
+          messages.forEach((msg) => {
+            if (msg.type === "ai" && msg.isMultiLLM) {
+              allMultiLLMMessages.push({
+                id: msg._id,
+                type: "ai",
+                content: msg.content,
+                time: new Date(msg.createdAt).toLocaleTimeString(),
+              });
+            }
+          });
+
+          // Set all messages at once
+          setMultiLLMMessages(allMultiLLMMessages);
+        }
+      }
+    }
+
+    getChatMesssages();
+  }, [activeChat]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
     const prompt = input;
     setInput("");
-    
-    
+
     const userMessage = {
       id: Date.now() + "-user",
       type: "user",
@@ -173,10 +298,18 @@ const Home = ({ paymentDone, setPaymentDone }) => {
       ),
     }));
 
-    // ✅ Also add to Multi-LLM (if open)
+    // ✅ Also add to Multi-LLM column if it's open
     if (showMultiLLMBox) {
-      setMultiLLMMessages((prev) => [...prev, userMessage]);
+      // Add user message to Multi-LLM column
+      const multiLLMUserMessage = {
+        ...userMessage,
+        isMultiLLM: true, // Mark as Multi-LLM message
+      };
+      setMultiLLMMessages((prev) => [...prev, multiLLMUserMessage]);
       setMultiLLMTyping(true);
+
+      // Log to verify message is added
+      console.log("Added user message to Multi-LLM:", multiLLMUserMessage);
     }
 
     // ✅ Set typing indicators for active chat only
@@ -208,7 +341,6 @@ const Home = ({ paymentDone, setPaymentDone }) => {
       );
       const data = res.data;
       // console.log("AAGYA");
-      
 
       console.log("Backend return Data : ", res);
 
@@ -242,20 +374,22 @@ const Home = ({ paymentDone, setPaymentDone }) => {
 
         // --- Multi-LLM response ---
         if (showMultiLLMBox && data.data.multiLLMResponse) {
-          const aiMessage = {
+          const multiLLMAIMessage = {
             id: Date.now() + "-multi",
             type: "ai",
             content: data.data.multiLLMResponse,
             time: new Date().toLocaleTimeString(),
+            isMultiLLM: true, // Mark as Multi-LLM message
           };
-          setMultiLLMMessages((prev) => [...prev, aiMessage]);
+          setMultiLLMMessages((prev) => [...prev, multiLLMAIMessage]);
+          console.log("Added AI response to Multi-LLM:", multiLLMAIMessage);
           setMultiLLMTyping(false);
         }
       }
     } catch (err) {
       if (err.response) {
         if (err.response.status === 401) {
-          alert("Inshufficient Creds❌❌❌")
+          alert("Inshufficient Creds❌❌❌");
         }
       }
       console.error("❌ Error in handleSubmit:", err);
