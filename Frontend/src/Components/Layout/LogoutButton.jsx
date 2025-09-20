@@ -7,14 +7,19 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     try {
+    
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}api/user/logout`,
         { withCredentials: true }
       );
 
+     
+
+
       
 
       if (response.status === 201) {
+        localStorage.removeItem("token");
         navigate("/login");
       }
     } catch (error) {

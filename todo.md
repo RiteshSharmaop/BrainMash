@@ -132,7 +132,7 @@ https://brainmash-1.onrender.com/
 ## connect chat and message to db
 
 - show user chats only ✅
-- user able to delete chats
+- user able to delete chats✅
 - get active chat messages✅
 
 ## chat functionality

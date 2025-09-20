@@ -96,7 +96,7 @@ const SignupPage = () => {
       );
 
       // success
-      console.log(res.data);
+ 
       
       
       const data = res.data.data;
