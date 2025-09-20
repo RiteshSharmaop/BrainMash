@@ -32,7 +32,7 @@ export default function LogoutButton() {
     <div className="relative group">
       <button
         onClick={handleLogout}
-        className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition"
+        className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-700 hover:bg-red-600 text-white transition"
       >
         <LogOut size={16} />
       </button>
