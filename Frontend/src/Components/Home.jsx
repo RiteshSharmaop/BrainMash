@@ -160,6 +160,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   useEffect(() => {
     async function getChatMesssages() {
       try {
+        const token = localStorage.getItem("token")
         // Don't fetch if no activeChat is set
         if (!activeChat || activeChat === "initial-1") {
           console.log("No active chat to fetch messages for");
@@ -169,10 +170,13 @@ const Home = ({ paymentDone, setPaymentDone }) => {
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}api/chat/${activeChat}/messages`,
           {
-            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            withCredentials:true
           }
         );
-        console.log("Messages from server:", res.data);
+        // console.log("Messages from server:", res.data);
 
         if (res.data.success) {
           const messages = res.data.messages;
@@ -322,7 +326,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
       setMultiLLMTyping(true);
 
       // Log to verify message is added
-      console.log("Added user message to Multi-LLM:", multiLLMUserMessage);
+      // console.log("Added user message to Multi-LLM:", multiLLMUserMessage);
     }
 
     // ✅ Set typing indicators for active chat only
@@ -355,7 +359,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
       const data = res.data;
       // console.log("AAGYA");
 
-      console.log("Backend return Data : ", res);
+      // console.log("Backend return Data : ", res);
 
       if (data.success) {
         const results = data.data.results;
@@ -395,7 +399,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
             isMultiLLM: true, // Mark as Multi-LLM message
           };
           setMultiLLMMessages((prev) => [...prev, multiLLMAIMessage]);
-          console.log("Added AI response to Multi-LLM:", multiLLMAIMessage);
+          // console.log("Added AI response to Multi-LLM:", multiLLMAIMessage);
           setMultiLLMTyping(false);
         }
       }
@@ -431,7 +435,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
         return;
       }
 
-      console.log("Created new chat:", createChatResponse.data);
+      // console.log("Created new chat:", createChatResponse.data);
 
       const data = createChatResponse.data.chat;
       // Create new chat object using MongoDB _id
@@ -546,7 +550,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
           await createChat();
         }
       }
-      console.log("Loaded chats:", response.data);
+      // console.log("Loaded chats:", response.data);
     } catch (error) {
       console.error("Error loading chats:", error);
       // If there's an error loading chats, create a new one
@@ -560,6 +564,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   }, []);
 
   const handleNewChat = async () => {
+    const token = localStorage.getItem("token")
     const createChat = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}api/chat/`,
       {
@@ -568,8 +573,11 @@ const Home = ({ paymentDone, setPaymentDone }) => {
         subtitle: "Creating test",
       },
       {
-        withCredentials: true,
-      }
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
+          withCredentials:true
+        }
     );
 
     const data = createChat.data.chat;
@@ -616,13 +624,16 @@ const Home = ({ paymentDone, setPaymentDone }) => {
 
   const handleDeleteChat = async(chatId) => {
     if (chats.length <= 1) return;
-    console.log("delete ChatId :", chatId);
+    // console.log("delete ChatId :", chatId);
 
     try{
-
+      const token = localStorage.getItem("token")
       const response = await axios.delete(
         `${import.meta.env.VITE_BACKEND_URL}api/chat/${chatId}`,
         {
+          headers: {
+            Authorization: `Bearer ${token}`
+          },
           withCredentials:true
         }
       );
@@ -649,9 +660,15 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   useEffect(() => {
     const checkPayment = async () => {
       try {
+        const token = localStorage.getItem("token")
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}api/payment/verify-payment`,
-          { withCredentials: true } // 🔑 send cookies
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            withCredentials:true
+          }
         );
 
         if (res.status === 200) {
