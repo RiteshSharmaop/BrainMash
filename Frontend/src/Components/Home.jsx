@@ -89,7 +89,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     // { id: "initial-1", title: "Chat 1", subtitle: "New Conversation" },
     // { id: "initial-2", title: "Chat 2", subtitle: "New Conversation" },
   ]);
-  const [activeChat, setActiveChat] = useState("initial-1");
+  const [activeChat, setActiveChat] = useState(null);
   const [multiLLMMessages, setMultiLLMMessages] = useState([]);
   const [multiLLMTyping, setMultiLLMTyping] = useState(false);
 
@@ -159,114 +159,127 @@ const Home = ({ paymentDone, setPaymentDone }) => {
 
   useEffect(() => {
     async function getChatMesssages() {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}api/chat/${activeChat}/messages`,
-        {
-          withCredentials: true,
+      try {
+        // Don't fetch if no activeChat is set
+        if (!activeChat || activeChat === "initial-1") {
+          console.log("No active chat to fetch messages for");
+          return;
         }
-      );
-      console.log("Messages from server:", res.data);
 
-      if (res.data.success) {
-        const messages = res.data.messages;
-
-        // Reset messages for current chat
-        setChatMessages((prev) => ({
-          ...prev,
-          [activeChat]: {
-            ChatGPT: [],
-            Gemini: [],
-            DeepSeek: [],
-            Perplexity: [],
-            Lama: [],
-          },
-        }));
-
-        // Process each message
-        messages.forEach((msg) => {
-          if (msg.type === "user") {
-            // Create user message object
-            const userMessage = {
-              id: msg._id,
-              type: "user",
-              content: msg.content,
-              time: new Date(msg.createdAt).toLocaleTimeString(),
-            };
-
-            // Add user message to all LLM columns
-            Object.keys(visibleLLMs).forEach((llmName) => {
-              if (visibleLLMs[llmName]) {
-                setChatMessages((prev) => ({
-                  ...prev,
-                  [activeChat]: {
-                    ...prev[activeChat],
-                    [llmName]: [...prev[activeChat][llmName], userMessage],
-                  },
-                }));
-              }
-            });
-          } else if (msg.type === "ai") {
-            const aiMessage = {
-              id: msg._id,
-              type: "ai",
-              content: msg.content,
-              time: new Date(msg.createdAt).toLocaleTimeString(),
-            };
-
-            // Map the backend model to frontend display name
-            const modelName = modelToNameMap[msg.model];
-
-            if (modelName && visibleLLMs[modelName]) {
-              setChatMessages((prev) => ({
-                ...prev,
-                [activeChat]: {
-                  ...prev[activeChat],
-                  [modelName]: [
-                    ...(prev[activeChat][modelName] || []),
-                    aiMessage,
-                  ],
-                },
-              }));
-            } else {
-              console.warn("⚠️ Unknown or hidden model:", msg.model);
-            }
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}api/chat/${activeChat}/messages`,
+          {
+            withCredentials: true,
           }
-        });
+        );
+        console.log("Messages from server:", res.data);
 
-        // Update Multi-LLM messages if box is open
-        if (showMultiLLMBox) {
-          setMultiLLMMessages([]); // Reset messages
+        if (res.data.success) {
+          const messages = res.data.messages;
 
-          // Create an array to hold all messages in order
-          const allMultiLLMMessages = [];
+          // Reset messages for current chat
+          setChatMessages((prev) => ({
+            ...prev,
+            [activeChat]: {
+              ChatGPT: [],
+              Gemini: [],
+              DeepSeek: [],
+              Perplexity: [],
+              Lama: [],
+            },
+          }));
 
-          // Add all user messages first
+          // Process each message
           messages.forEach((msg) => {
             if (msg.type === "user") {
-              allMultiLLMMessages.push({
+              // Create user message object
+              const userMessage = {
                 id: msg._id,
                 type: "user",
                 content: msg.content,
                 time: new Date(msg.createdAt).toLocaleTimeString(),
-              });
-            }
-          });
+              };
 
-          // Add AI messages that are multi-LLM responses
-          messages.forEach((msg) => {
-            if (msg.type === "ai" && msg.isMultiLLM) {
-              allMultiLLMMessages.push({
+              // Add user message to all LLM columns
+              Object.keys(visibleLLMs).forEach((llmName) => {
+                if (visibleLLMs[llmName]) {
+                  setChatMessages((prev) => ({
+                    ...prev,
+                    [activeChat]: {
+                      ...prev[activeChat],
+                      [llmName]: [...prev[activeChat][llmName], userMessage],
+                    },
+                  }));
+                }
+              });
+            } else if (msg.type === "ai") {
+              const aiMessage = {
                 id: msg._id,
                 type: "ai",
                 content: msg.content,
                 time: new Date(msg.createdAt).toLocaleTimeString(),
-              });
+              };
+
+              // Map the backend model to frontend display name
+              const modelName = modelToNameMap[msg.model];
+
+              if (modelName && visibleLLMs[modelName]) {
+                setChatMessages((prev) => ({
+                  ...prev,
+                  [activeChat]: {
+                    ...prev[activeChat],
+                    [modelName]: [
+                      ...(prev[activeChat][modelName] || []),
+                      aiMessage,
+                    ],
+                  },
+                }));
+              } else {
+                console.warn("⚠️ Unknown or hidden model:", msg.model);
+              }
             }
           });
 
-          // Set all messages at once
-          setMultiLLMMessages(allMultiLLMMessages);
+          // Update Multi-LLM messages if box is open
+          if (showMultiLLMBox) {
+            setMultiLLMMessages([]); // Reset messages
+
+            // Create an array to hold all messages in order
+            const allMultiLLMMessages = [];
+
+            // Add all user messages first
+            messages.forEach((msg) => {
+              if (msg.type === "user") {
+                allMultiLLMMessages.push({
+                  id: msg._id,
+                  type: "user",
+                  content: msg.content,
+                  time: new Date(msg.createdAt).toLocaleTimeString(),
+                });
+              }
+            });
+
+            // Add AI messages that are multi-LLM responses
+            messages.forEach((msg) => {
+              if (msg.type === "ai" && msg.isMultiLLM) {
+                allMultiLLMMessages.push({
+                  id: msg._id,
+                  type: "ai",
+                  content: msg.content,
+                  time: new Date(msg.createdAt).toLocaleTimeString(),
+                });
+              }
+            });
+
+            // Set all messages at once
+            setMultiLLMMessages(allMultiLLMMessages);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        // Handle specific error cases
+        if (error.response?.status === 500) {
+          console.warn("Server error while fetching messages");
         }
       }
     }
@@ -602,6 +615,8 @@ const Home = ({ paymentDone, setPaymentDone }) => {
 
   const handleDeleteChat = (chatId) => {
     if (chats.length <= 1) return;
+    console.log(chatId);
+
     const updatedChats = chats.filter((chat) => chat.id !== chatId);
     setChats(updatedChats);
     if (activeChat === chatId) {
