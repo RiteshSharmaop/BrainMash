@@ -136,3 +136,9 @@ https://brainmash-1.onrender.com/
 - get active chat messages✅
 
 ## chat functionality
+
+
+
+## auth updates
+- fetch token and do login
+- 

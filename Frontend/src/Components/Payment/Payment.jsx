@@ -15,10 +15,14 @@ const Payment = ({ setPaymentDone }) => {
   const handlePayment = async() => {
     const stripe = await stripePromise;
     console.log("Clicked on payment");
-    
+    const token = localStorage.getItem("token")
     const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/payment/create-checkout-session`,
-      { plan: "multi-llm" }, 
-      {  withCredentials: true } // 🔑 send cookies
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        withCredentials:true
+      }
     );
     
     const { url } = res.data;

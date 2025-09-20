@@ -7,10 +7,15 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     try {
-    
+      const token = localStorage.getItem("token")
       const response = await axios.get(
         `${import.meta.env.VITE_BACKEND_URL}api/user/logout`,
-        { withCredentials: true }
+        {
+            headers: {
+              Authorization: `Bearer ${token}`
+            },
+            withCredentials:true
+          }
       );
 
      
