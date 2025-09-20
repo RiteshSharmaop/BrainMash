@@ -4,8 +4,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { BlacklistToken } from "../models/blacklistToken.model.js";
-import redisClient from "../db/redis.js";
+import { client } from "../db/redis.js";
 
+const redisClient = client;
 
 const cookieOptions = {
     httpOnly: true,

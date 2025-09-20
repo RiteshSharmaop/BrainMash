@@ -1,14 +1,23 @@
 import { createClient } from "redis";
 
+
 const client = createClient({
-  url: "redis://localhost:6379",
-  // password: "your_password"  // if needed
+  username: process.env.REDIS_USERNAME,
+  password: process.env.REDIS_PASSWORD,
+  socket: {
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+  },
 });
 
-client.on("error", (err) => console.log("Redis Client Error", err));
+// Error handler
+client.on("error", (err) => console.error("❌ Redis Client Error:", err));
 
-await client.connect(); 
-console.log("Connected to Redis");
+async function connectRedis() {
+  if (!client.isOpen) {
+    await client.connect();
+    console.log("✅ Connected to Redis");
+  }
+}
 
-
-export default client;
+export { client, connectRedis };

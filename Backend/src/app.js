@@ -13,9 +13,10 @@ dotenv.config({
 connectDB();
 
 // redis connecrion
-import redisClient from "./db/redis.js";
-const client = redisClient;
 
+import { client , connectRedis } from "./db/redis.js";
+
+connectRedis();
 // // Set a key with expiration of 10 seconds
 await client.set("mykey", "Hello Redisssss!", {
   EX: 10  // expires in 10 seconds
