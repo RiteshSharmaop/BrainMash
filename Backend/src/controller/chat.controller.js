@@ -39,8 +39,13 @@ const getMessagesForChat = async (req, res) => {
 
 const deleteChat =  async (req, res) => {
   try {
-    await Chat.findByIdAndDelete(req.params.id);
-    await Message.deleteMany({ chatId: req.params.id });
+    const { chatId } = req.params;
+    const  delChat = await Chat.findByIdAndDelete(chatId);
+    if(!delChat) {
+      return res.status(404).json({ success: false, message: "Chat not found" });
+    }
+    const delMessages = await Message.deleteMany({ chatId });
+    
     res.json({ success: true, message: "Chat deleted" });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

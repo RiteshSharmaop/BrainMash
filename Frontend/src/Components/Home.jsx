@@ -285,7 +285,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     }
 
     getChatMesssages();
-  }, [activeChat]);
+  }, [activeChat , setChats ]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -400,6 +400,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
         }
       }
     } catch (err) {
+      setIsTyping(false);
       if (err.response) {
         if (err.response.status === 401) {
           alert("Inshufficient Creds❌❌❌");
@@ -613,10 +614,24 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     setActiveChat(newChat.id);
   };
 
-  const handleDeleteChat = (chatId) => {
+  const handleDeleteChat = async(chatId) => {
     if (chats.length <= 1) return;
-    console.log(chatId);
+    console.log("delete ChatId :", chatId);
 
+    try{
+
+      const response = await axios.delete(
+        `${import.meta.env.VITE_BACKEND_URL}api/chat/${chatId}`,
+        {
+          withCredentials:true
+        }
+      );
+    } catch(err){
+      if(err.response){
+        alert("Cannot able to delete chat " , err)
+      }
+    }
+      
     const updatedChats = chats.filter((chat) => chat.id !== chatId);
     setChats(updatedChats);
     if (activeChat === chatId) {
