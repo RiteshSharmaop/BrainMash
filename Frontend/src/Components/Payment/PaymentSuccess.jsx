@@ -2,13 +2,35 @@ import React from "react";
 import { CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ParticleBackground from "../Layout/ParticleBackground";
+import axios from "axios";
 
-const PaymentSuccess = ({setPaymentDone}) => {
-    const navigate = useNavigate();
-    const handleSucces = ()=>{
-      setPaymentDone(true);
-      navigate("/chat")
+const PaymentSuccess = ({ setPaymentDone }) => {
+  const navigate = useNavigate();
+  const handleSucces = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      // Verify payment on backend
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}api/payment/verify-payment`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        setPaymentDone(true);
+        localStorage.setItem("paymentStatus", "paid"); // Store payment status
+        navigate("/chat");
+      } else {
+        console.error("Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Error verifying payment:", error);
     }
+  };
   return (
     <div className="h-screen flex items-center justify-center bg-gray-900 text-white relative overflow-hidden">
       <ParticleBackground />
@@ -33,4 +55,3 @@ const PaymentSuccess = ({setPaymentDone}) => {
 };
 
 export default PaymentSuccess;
-

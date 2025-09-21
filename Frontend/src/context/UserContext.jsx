@@ -6,6 +6,7 @@ const UserContext = ({ children }) => {
   const [user, setUser] = useState({
     email: "",
     fullName: "",
+    isPaid: false,
   });
   const [token, setToken] = useState(localStorage.getItem("token") || null);
 
@@ -33,9 +34,10 @@ const UserContext = ({ children }) => {
     setUser({ email: "", fullName: "" });
   };
 
-
   return (
-    <UserDataContext.Provider value={{ user, setUser, token, setToken, logout }}>
+    <UserDataContext.Provider
+      value={{ user, setUser, token, setToken, logout }}
+    >
       {children}
     </UserDataContext.Provider>
   );

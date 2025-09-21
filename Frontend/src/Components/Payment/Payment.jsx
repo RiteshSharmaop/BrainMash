@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Crown, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -8,25 +7,65 @@ import axios from "axios";
 
 const stripePromise = loadStripe(import.meta.env.VITE_PUBLISHABLE_KEY);
 
-
 const Payment = ({ setPaymentDone }) => {
   const navigate = useNavigate();
 
-  const handlePayment = async() => {
-    const stripe = await stripePromise;
-    console.log("Clicked on payment");
-    const token = localStorage.getItem("token")
-    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}api/payment/create-checkout-session`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        withCredentials:true
+  const handlePayment = async () => {
+    try {
+      const stripe = await stripePromise;
+      if (!stripe) {
+        console.error("Stripe failed to load");
+        return;
       }
-    );
-    
-    const { url } = res.data;
-    window.location.href = url; // Redirect to Stripe
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+
+      const res = await axios.post(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }api/payment/create-checkout-session`,
+        {}, // Empty object as payload since we don't need to send data
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      
+      if (res.data.success) {
+        const { url } = res.data;
+        if (url) {
+          window.location.href = url; // Redirect to Stripe
+        } else {
+          console.error("No checkout URL received from server");
+        }
+      } else {
+        console.error("Payment session creation failed:", res.data);
+      }
+
+
+
+    } catch (error) {
+      console.error("Payment error:", error);
+      if (error.response?.status === 401) {
+        // Handle unauthorized - maybe redirect to login
+        console.error("Authentication failed. Please log in again.");
+        // Optionally redirect to login
+        // navigate('/login');
+      } else {
+        // Handle other errors
+        console.error(
+          "Failed to create payment session:",
+          error.response?.data || error.message
+        );
+      }
+    }
   };
 
   return (
@@ -44,7 +83,9 @@ const Payment = ({ setPaymentDone }) => {
             Upgrade to Pro
           </h1>
           <p className="text-gray-400 text-center mt-2">
-            Unlock <span className="text-purple-400 font-semibold">Multi-LLM</span> and premium features for just
+            Unlock{" "}
+            <span className="text-purple-400 font-semibold">Multi-LLM</span> and
+            premium features for just
           </p>
         </div>
 
@@ -60,7 +101,7 @@ const Payment = ({ setPaymentDone }) => {
             "Life Time Access",
             "Access Multi-LLM mode",
             "Priority response speed",
-            "Early access to new models"
+            "Early access to new models",
           ].map((feature, i) => (
             <li key={i} className="flex items-center gap-2 text-gray-300">
               <CheckCircle className="text-green-400 w-5 h-5" />
@@ -93,4 +134,3 @@ const Payment = ({ setPaymentDone }) => {
 };
 
 export default Payment;
-

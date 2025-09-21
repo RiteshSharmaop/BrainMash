@@ -9,6 +9,7 @@ import Payment from "./Components/Payment/Payment"
 import { useState } from "react"
 import PaymentSuccess from "./Components/Payment/PaymentSuccess"
 import PaymentCancel from "./Components/Payment/PaymentCancel"
+import ForgetPasswordPage from "./Pages/ForgetPasswordPage"
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path='/' element= {<Navigate to="/chat" replace />} />
 
         <Route path='/login' element= {<LoginPage/>}/>
+        <Route path='/forget-password' element= {<ForgetPasswordPage/>}/>
         <Route path='/register' element= {<SignupPage/>}/>
         <Route path='/chat' element={
           <UserProtectedWrapper>

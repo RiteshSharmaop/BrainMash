@@ -6,6 +6,10 @@ import LLMColumn from "./Chat/LLMColumn";
 import Sidebar from "./Layout/Sidebar";
 import { UserDataContext } from "../context/UserContext";
 import { useContext } from "react";
+import {
+  verifyPaymentStatus,
+  getLocalPaymentStatus,
+} from "../utils/paymentUtils.js";
 
 const Home = ({ paymentDone, setPaymentDone }) => {
   const [visibleLLMs, setVisibleLLMs] = useState({
@@ -160,7 +164,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   useEffect(() => {
     async function getChatMesssages() {
       try {
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("token");
         // Don't fetch if no activeChat is set
         if (!activeChat || activeChat === "initial-1") {
           console.log("No active chat to fetch messages for");
@@ -171,9 +175,9 @@ const Home = ({ paymentDone, setPaymentDone }) => {
           `${import.meta.env.VITE_BACKEND_URL}api/chat/${activeChat}/messages`,
           {
             headers: {
-              Authorization: `Bearer ${token}`
+              Authorization: `Bearer ${token}`,
             },
-            withCredentials:true
+            withCredentials: true,
           }
         );
         // console.log("Messages from server:", res.data);
@@ -289,7 +293,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     }
 
     getChatMesssages();
-  }, [activeChat , setChats ]);
+  }, [activeChat, setChats]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -564,7 +568,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   }, []);
 
   const handleNewChat = async () => {
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
     const createChat = await axios.post(
       `${import.meta.env.VITE_BACKEND_URL}api/chat/`,
       {
@@ -573,11 +577,11 @@ const Home = ({ paymentDone, setPaymentDone }) => {
         subtitle: "Creating test",
       },
       {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
-          withCredentials:true
-        }
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      }
     );
 
     const data = createChat.data.chat;
@@ -622,27 +626,27 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     setActiveChat(newChat.id);
   };
 
-  const handleDeleteChat = async(chatId) => {
+  const handleDeleteChat = async (chatId) => {
     if (chats.length <= 1) return;
     // console.log("delete ChatId :", chatId);
 
-    try{
-      const token = localStorage.getItem("token")
+    try {
+      const token = localStorage.getItem("token");
       const response = await axios.delete(
         `${import.meta.env.VITE_BACKEND_URL}api/chat/${chatId}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
           },
-          withCredentials:true
+          withCredentials: true,
         }
       );
-    } catch(err){
-      if(err.response){
-        alert("Cannot able to delete chat " , err)
+    } catch (err) {
+      if (err.response) {
+        alert("Cannot able to delete chat ", err);
       }
     }
-      
+
     const updatedChats = chats.filter((chat) => chat.id !== chatId);
     setChats(updatedChats);
     if (activeChat === chatId) {
@@ -660,28 +664,39 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   useEffect(() => {
     const checkPayment = async () => {
       try {
-        const token = localStorage.getItem("token")
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}api/payment/verify-payment`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            withCredentials:true
-          }
-        );
-
-        if (res.status === 200) {
+        // First check local storage for quick response
+        const payment = localStorage.getItem("paymentStatus");
+        if (payment === "paid") {
           setPaymentDone(true);
         }
-        // if(res.dat){
-        // }
-        // Update your context or state here, e.g. markAsPaid(res.data.isPaid)
-      } catch (err) {}
+
+        // Then verify with backend
+        const verifyPayment = await verifyPaymentStatus();
+        if (verifyPayment) {
+          setPaymentDone(true);
+          localStorage.setItem("paymentStatus", "paid");
+        } else {
+          setPaymentDone(false);
+          localStorage.removeItem("paymentStatus");
+        }
+      } catch (err) {
+        console.error("Payment verification error:", err);
+        if (err.response?.status === 401) {
+          setPaymentDone(false);
+          localStorage.removeItem("paymentStatus");
+        }
+      }
     };
 
+    // Initial check
     checkPayment();
-  }, [paymentDone, setPaymentDone]); // runs whenever paymentDone changes
+
+    // Set up periodic check every 5 minutes
+    const interval = setInterval(checkPayment, 5 * 60 * 1000);
+
+    // Cleanup
+    return () => clearInterval(interval);
+  }, []); // Only run on mount
 
   return (
     <div className="h-screen flex bg-gray-900 text-white relative overflow-hidden">

@@ -52,6 +52,31 @@ const deleteChat =  async (req, res) => {
   }
 }
 
+
+
+// const shareChat = async (req, res) => {
+//   const { chatId } = req.body;
+
+//   // Fetch messages from DB
+//   const chat = await Chat.findById(chatId);
+
+//   if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
+
+//   // Create share entry
+//   const shareId = crypto.randomBytes(8).toString("hex");
+
+//   await SharedChat.create({
+//     shareId,
+//     chatId,
+//     messages: chat.messages,
+//   });
+
+//   res.json({
+//     success: true,
+//     url: `${process.env.FRONTEND_URL}/share/${shareId}`,
+//   });
+// }
+
 export {
     createChat,
     getAllchats,

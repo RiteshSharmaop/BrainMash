@@ -14,12 +14,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ✅ Create checkout session
 const payment = asyncHandler(async (req, res) => {
+  console.log("payment merin aay...................................");
     const alreadyPaid = await client.get(`Payment:${req.user._id}`);
-
+    
     if (alreadyPaid) {
-        return res.status(400).json({ error: "Payment already made" });
+      return res.status(400).json({ error: "Payment already made" });
     }
-   
+    
 
   
     try {
@@ -46,12 +47,11 @@ const payment = asyncHandler(async (req, res) => {
 
     
 
-    console.log(session);
     
-    // unpaid for development purpose
+
     const sessionStatus = ((process.env.NODE_ENV === "development") ? "paid" : "unpaid");
     // const sessionStatus = ((process.env.NODE_ENV === "production") ? session.payment_status : "unpaid");
-
+    
 
 
     if (sessionStatus === "paid") {
@@ -84,9 +84,9 @@ const payment = asyncHandler(async (req, res) => {
         
     }
 
-    res.json({ id: session.id, url: session.url });
+    res.json({ success:true, id: session.id, url: session.url });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success:false, error: error.message });
   }
 });
 
@@ -95,6 +95,9 @@ const verifyPayment = asyncHandler(async (req, res) => {
     const user = req.user
 
     const redisUser = await client.get(`Payment:${user._id}`);
+    if(!redisUser) {
+        return res.status(401).json({ success: false, message: "Need To do Payment" });
+    }
 
     if (redisUser) {
         return res.status(200).json({ success: true, message: "Payment verified successfully from cache" });

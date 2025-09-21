@@ -135,10 +135,17 @@ https://brainmash-1.onrender.com/
 - user able to delete chats✅
 - get active chat messages✅
 
+
+
+
 ## chat functionality
-
-
+- add share chat functionality
+- store get user chat , get user messages in redis
+- add function on chats and messages in redis
 
 ## auth updates
 - fetch token and do login
-- 
+- add forget pass page
+
+
+
