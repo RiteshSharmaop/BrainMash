@@ -140,6 +140,7 @@ https://brainmash-1.onrender.com/
 
 ## chat functionality
 - add share chat functionality
+- handle chare
 - store get user chat , get user messages in redis
 - add function on chats and messages in redis
 
@@ -149,3 +150,12 @@ https://brainmash-1.onrender.com/
 
 
 
+
+
+
+
+## Working Model
+- gemini
+- lama
+- Perplexity
+- Deepseek

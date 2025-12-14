@@ -74,6 +74,9 @@ const LoginPage = () => {
     email: "test@test.com",
     password: "testtest",
   });
+
+
+
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
 
@@ -94,7 +97,7 @@ const LoginPage = () => {
 
         // ensures cookies are sent/received
       );
-      console.log(res);
+      console.log("RES : " , res);
 
       if (res.data.success || res.status === 201 || res.status === 200) {
         // Extract user and token from the response

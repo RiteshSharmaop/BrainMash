@@ -10,6 +10,7 @@ import { useState } from "react"
 import PaymentSuccess from "./Components/Payment/PaymentSuccess"
 import PaymentCancel from "./Components/Payment/PaymentCancel"
 import ForgetPasswordPage from "./Pages/ForgetPasswordPage"
+import UserProfilePage from "./Pages/UserProfilePage"
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
     <>
       <Routes>
         <Route path='/' element= {<Navigate to="/chat" replace />} />
+        <Route path='/profile' element= {<UserProfilePage/>} />
 
         <Route path='/login' element= {<LoginPage/>}/>
         <Route path='/forget-password' element= {<ForgetPasswordPage/>}/>

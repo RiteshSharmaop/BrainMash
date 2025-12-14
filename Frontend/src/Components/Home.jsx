@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Lock, MessageCircle } from "lucide-react";
+import Navbar from "./Layout/Navbar";
+import ShareChatModal from "./Chat/ShareChatModal";
 import axios from "axios";
 import ParticleBackground from "./Layout/ParticleBackground";
 import LLMColumn from "./Chat/LLMColumn";
@@ -17,7 +19,7 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     Gemini: true,
     DeepSeek: true,
     Perplexity: true,
-    Lama: true,
+    Lama: false,
   });
 
   const [messages, setMessages] = useState({
@@ -62,22 +64,36 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   });
 
   const llmConfigs = [
-    { name: "ChatGPT", color: "bg-green-600", model: "openai/gpt-4o-mini" },
-    { name: "Gemini", color: "bg-blue-600", model: "google/gemini-2.5-flash" },
+    {
+      name: "ChatGPT",
+      color: "bg-green-600",
+      // model: "openai/gpt-4o-mini",
+      model: "openai/gpt-oss-20b:free",
+    },
+    {
+      name: "Gemini",
+      color: "bg-blue-600",
+      // model: "google/gemini-2.5-flash",
+      model: "google/gemma-3n-e4b-it:free",
+    },
     {
       name: "DeepSeek",
       color: "bg-purple-600",
-      model: "deepseek/deepseek-chat-v3.1",
+      // model: "deepseek/deepseek-chat-v3.1",
+      // model: "deepseek/deepseek-chat-v3.1:free",
+      model: "tngtech/deepseek-r1t2-chimera:free",
     },
     {
       name: "Perplexity",
       color: "bg-orange-600",
-      model: "perplexity/sonar-pro",
+      // model: "perplexity/sonar-pro",
+      model: "nvidia/nemotron-nano-9b-v2:free",
     },
     {
       name: "Lama",
       color: "bg-cyan-600",
-      model: "meta-llama/llama-4-maverick",
+      // model: "meta-llama/llama-4-maverick",
+      model: "meta-llama/llama-3.3-8b-instruct:free",
     },
   ];
 
@@ -96,6 +112,11 @@ const Home = ({ paymentDone, setPaymentDone }) => {
   const [activeChat, setActiveChat] = useState(null);
   const [multiLLMMessages, setMultiLLMMessages] = useState([]);
   const [multiLLMTyping, setMultiLLMTyping] = useState(false);
+
+  // Share functionality states
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareLink, setShareLink] = useState("");
+  const [copied, setCopied] = useState(false);
 
   // Map backend model IDs to frontend display names
   const modelToNameMap = {
@@ -698,9 +719,46 @@ const Home = ({ paymentDone, setPaymentDone }) => {
     return () => clearInterval(interval);
   }, []); // Only run on mount
 
+  const handleShare = async () => {
+    if (!activeChat) {
+      alert("No chat selected to share");
+      return;
+    }
+
+    // Open share modal and pass current chat id/title
+    const current = chats.find(
+      (c) => c._id === activeChat || c.id === activeChat
+    );
+    const chatTitle = current?.title || "Untitled Chat";
+
+    setIsShareModalOpen(true);
+    setShareLink("");
+
+    // Provide chatId and title to modal via props (ShareChatModal receives chatId, chatTitle)
+    // The modal itself will call the backend endpoint to generate the share link
+  };
+
   return (
     <div className="h-screen flex bg-gray-900 text-white relative overflow-hidden">
       <ParticleBackground />
+
+      {/* Navbar */}
+      <Navbar
+        onShare={handleShare}
+        isActiveChat={activeChat !== null}
+        sidebarWidth={sidebarWidth}
+      />
+
+      {/* Share Modal */}
+      <ShareChatModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        chatId={activeChat}
+        chatTitle={
+          (chats.find((c) => c._id === activeChat || c.id === activeChat) || {})
+            .title
+        }
+      />
 
       {/* Sidebar */}
       <Sidebar
@@ -720,10 +778,10 @@ const Home = ({ paymentDone, setPaymentDone }) => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col h-full relative z-10">
+      <div className="flex-1 flex flex-col h-full relative z-10 pt-16">
         {/* LLM Columns */}
         <div
-          className="flex-1 grid gap-4 p-6 overflow-hidden"
+          className="flex-1 grid gap-4 pl-6 pr-6 pt-2.5 pb-6 overflow-hidden "
           style={{
             gridTemplateColumns: `repeat(${
               getVisibleLLMs().length + (showMultiLLMBox ? 1 : 0)
