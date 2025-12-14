@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Menu, X, Share2, LogOut, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Menu, X, Share2, LogOut, User, TvMinimal, ScanHeart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Navbar = ({ onShare, isActiveChat, sidebarWidth }) => {
@@ -46,27 +46,40 @@ const Navbar = ({ onShare, isActiveChat, sidebarWidth }) => {
 
         {/* Navigation Items */}
         <div className="flex items-center gap-4">
+
+          {/* HexaHub Prediction */}
+          {isActiveChat && (
+            <Link
+              to="https://hexahub-mern.onrender.com"
+              className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg transition-colors"
+            >
+              <TvMinimal size={18} />
+              <span className="hidden sm:inline">HexaHub</span>
+            </Link>
+          )}
+
+
+          {/* Health Prediction */}
+          {isActiveChat && (
+            <Link
+            to="https://multiplediseaseprediction-22127.streamlit.app/"
+            className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg transition-colors"
+            >
+              <ScanHeart size={18} />
+              <span className="hidden sm:inline">Health Prediction</span>
+            </Link>
+          )}
+
           {/* Share Button */}
           {isActiveChat && (
             <button
-              onClick={onShare}
-              className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg transition-colors"
+            onClick={onShare}
+            className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg transition-colors"
             >
               <Share2 size={18} />
               <span className="hidden sm:inline">Share Chat</span>
             </button>
           )}
-
-          {isActiveChat && (
-            <button
-              onClick={handleHealthPrediction}
-              className="flex items-center cursor-pointer gap-2 px-4 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg transition-colors"
-            >
-              <Share2 size={18} />
-              <span className="hidden sm:inline">Health Prediction</span>
-            </button>
-          )}
-
           {/* Hamburger Menu */}
           <div className="relative">
             <button
