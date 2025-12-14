@@ -1,5 +1,6 @@
 # 🚀 Brain Mesh Chat Platform  
 
+## Hosted Link : https://brainmash-1.onrender.com/
 A web application that allows users to interact with multiple **Large Language Models (LLMs)** simultaneously. The platform provides **free LLM responses** as well as a **paid Multi-LLM feature**, which consolidates responses from all available LLMs into one concise summary using OpenAI GPT.  
 
 The project also integrates **Stripe** for secure payments and uses **MongoDB** for persistent storage. Redis caching will be added later for payment/session optimization.  
